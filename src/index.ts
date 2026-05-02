@@ -20,7 +20,7 @@ app.use('/api', router);
 if (isProd) {
   const frontendDist = path.join(__dirname, '../frontend/dist');
   app.use(express.static(frontendDist));
-  app.get('/:path*', (_req, res) => {
+  app.get('/:path(.*)', (_req, res) => {
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 } else {
