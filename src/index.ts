@@ -20,8 +20,14 @@ app.use('/api', router);
 if (isProd) {
   const frontendDist = path.join(__dirname, '../frontend/dist');
   app.use(express.static(frontendDist));
-  app.get('/:path(.*)', (_req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'));
+  
+  // Middleware de fallback para SPA (React)
+  app.use((req, res, next) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(frontendDist, 'index.html'));
+    } else {
+      next();
+    }
   });
 } else {
   app.get('/', (_req, res) => {
