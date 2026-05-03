@@ -17,20 +17,16 @@ interface Curso {
 }
 
 export default function CursosPage() {
-  const [programas, setProgramas] = useState<Programa[]>([]);
-  useEffect(() => { api.get<Programa[]>('/programas').then(r => setProgramas(r.data)).catch(() => {}); }, []);
-
-  const defaultForm: Partial<Curso> = { id_programa: '', nome_curso: '', descricao: '', conteudo: '', carga_horaria_horas: 0, carga_horaria_minutos: 0, ativo: 'S' };
-
+  const defaultForm: Partial<Curso> = { nome_curso: '', descricao: '', conteudo: '', carga_horaria_horas: 0, carga_horaria_minutos: 0, ativo: 'S' };
+  
   return (
     <CrudPage<Curso>
       title="Cursos"
       endpoint="/cursos"
       idKey="id_curso"
-      searchKeys={['nome_curso', 'nome_programa']}
+      searchKeys={['nome_curso']}
       columns={[
         { label: 'Curso', key: 'nome_curso', render: r => <button className="link-btn">{r.nome_curso}</button> },
-        { label: 'Programa', key: 'nome_programa' },
         { label: 'C.H.', key: 'carga_horaria_horas', render: r => `${r.carga_horaria_horas}h${r.carga_horaria_minutos ? r.carga_horaria_minutos + 'min' : ''}` },
         { label: 'Status', key: 'ativo', render: r => (
           <span className={`badge ${r.ativo === 'S' ? 'badge-blue' : 'badge-grey'}`}>{r.ativo === 'S' ? 'Ativo' : 'Inativo'}</span>
@@ -39,13 +35,6 @@ export default function CursosPage() {
       defaultForm={defaultForm}
       renderForm={(data, onChange) => (
         <div className="form-grid cols-1">
-          <div className="form-group">
-            <label>Programa *</label>
-            <select value={data.id_programa || ''} onChange={e => onChange('id_programa', e.target.value)}>
-              <option value="">Selecione o Programa</option>
-              {programas.map(p => <option key={p.id_programa} value={p.id_programa}>{p.nome_programa}</option>)}
-            </select>
-          </div>
           <div className="form-group">
             <label>Nome do Curso *</label>
             <input type="text" value={data.nome_curso || ''} onChange={e => onChange('nome_curso', e.target.value)} />

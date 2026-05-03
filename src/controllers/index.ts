@@ -4,18 +4,18 @@ import pool from '../config/database';
 
 // Helper para traduzir erros comuns de SQL para Português-BR
 function handleSqlError(e: any, res: any) {
-  let message = 'Erro ao processar dados.';
+  let message = 'Não foi possível salvar os dados. Verifique os campos e tente novamente.';
   
   if (e.code === 'ER_DUP_ENTRY') {
-    message = 'Este registro (CPF/CNPJ/Código) já existe no sistema.';
+    message = 'Este registro (CPF, CNPJ ou Código) já existe no sistema.';
   } else if (e.code === 'ER_NO_REFERENCED_ROW_2') {
-    message = 'Não foi possível salvar: registro relacionado não encontrado.';
+    message = 'Selecione uma opção válida nos campos de seleção (Curso, Educador, etc).';
   } else if (e.code === 'ER_BAD_FIELD_ERROR') {
-    message = 'Erro técnico: Um dos campos enviados não existe na tabela.';
+    message = 'Erro de estrutura: Um dos campos enviados não é aceito pelo banco de dados.';
   } else if (e.code === 'ER_DATA_TOO_LONG') {
-    message = 'Texto muito longo para um dos campos.';
-  } else if (e.code === 'ER_PARSE_ERROR') {
-    message = 'Erro de sintaxe no comando enviado.';
+    message = 'O texto digitado é muito grande para um dos campos.';
+  } else if (e.code === 'ER_TRUNCATED_WRONG_VALUE' || e.code === 'ER_WRONG_VALUE_COUNT_ON_ROW') {
+    message = 'Valor inválido preenchido em um dos campos (verifique números e datas).';
   }
 
   res.status(400).json({ message });
