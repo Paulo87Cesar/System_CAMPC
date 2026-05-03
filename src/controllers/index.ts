@@ -46,7 +46,7 @@ export function crudController(table: string, idCol: string): Record<string, Req
         const result: any = await BaseModel.insert(table, req.body);
         res.status(201).json({ [idCol]: result.insertId, ...req.body });
       } catch (e: any) {
-        res.status(500).json({ message: e.message });
+        handleSqlError(e, res);
       }
     },
     update: async (req, res) => {
@@ -54,7 +54,7 @@ export function crudController(table: string, idCol: string): Record<string, Req
         await BaseModel.update(table, idCol, Number(req.params.id), req.body);
         res.json({ message: 'Updated successfully' });
       } catch (e: any) {
-        res.status(500).json({ message: e.message });
+        handleSqlError(e, res);
       }
     },
     remove: async (req, res) => {
@@ -62,7 +62,7 @@ export function crudController(table: string, idCol: string): Record<string, Req
         await BaseModel.remove(table, idCol, Number(req.params.id));
         res.json({ message: 'Deleted successfully' });
       } catch (e: any) {
-        res.status(500).json({ message: e.message });
+        handleSqlError(e, res);
       }
     }
   };
@@ -79,7 +79,7 @@ export const JovemController: Record<string, RequestHandler> = {
          FROM cadastro_jovem ORDER BY nome_completo`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -94,7 +94,7 @@ export const InscricaoController: Record<string, RequestHandler> = {
          FROM inscricao_2026 ORDER BY data_cadastro DESC`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   },
   aprovar: async (req, res) => {
     try {
@@ -103,7 +103,7 @@ export const InscricaoController: Record<string, RequestHandler> = {
         [req.params.id]
       );
       res.json({ message: 'Inscrição aprovada — jovem criado via trigger' });
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -123,7 +123,7 @@ export const ProgramaController: Record<string, RequestHandler> = {
          JOIN projeto p ON p.id_projeto = pg.id_projeto ORDER BY pg.ano DESC`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -137,7 +137,7 @@ export const CursoController: Record<string, RequestHandler> = {
          JOIN programa pg ON pg.id_programa = c.id_programa ORDER BY c.nome_curso`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -151,7 +151,7 @@ export const DisciplinaController: Record<string, RequestHandler> = {
          JOIN curso c ON c.id_curso = d.id_curso ORDER BY d.id_curso, d.ordem`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -168,7 +168,7 @@ export const TurmaController: Record<string, RequestHandler> = {
          ORDER BY t.data_inicio DESC`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -185,7 +185,7 @@ export const MatriculaController: Record<string, RequestHandler> = {
          ORDER BY mt.data_matricula DESC`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -201,7 +201,7 @@ export const BoletimController: Record<string, RequestHandler> = {
         [req.params.matriculaId]
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -221,7 +221,7 @@ export const ContratoController: Record<string, RequestHandler> = {
          ORDER BY c.data_inicio DESC`
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
 
@@ -252,6 +252,6 @@ export const DashboardController: Record<string, RequestHandler> = {
         inscricoesPorStatus: porStatus,
         matriculasPorStatus
       });
-    } catch (e: any) { res.status(500).json({ message: e.message }); }
+    } catch (e: any) { handleSqlError(e, res); }
   }
 };
