@@ -25,8 +25,8 @@ export default function TurmasPage() {
   const [educadores, setEducadores] = useState<Educador[]>([]);
 
   useEffect(() => {
-    api.get<Curso[]>('/cursos').then(r => setCursos(r.data)).catch(() => {});
-    api.get<Educador[]>('/educadores').then(r => setEducadores(r.data)).catch(() => {});
+    api.get<Curso[]>('/cursos').then(r => setCursos(r.data)).catch(() => { });
+    api.get<Educador[]>('/educadores').then(r => setEducadores(r.data)).catch(() => { });
   }, []);
 
   const defaultForm: Partial<Turma> = {
@@ -48,9 +48,11 @@ export default function TurmasPage() {
         { label: 'Período', key: 'periodo' },
         { label: 'Início', key: 'data_inicio', render: r => r.data_inicio ? new Date(r.data_inicio).toLocaleDateString('pt-BR') : '-' },
         { label: 'Vagas', key: 'vagas' },
-        { label: 'Status', key: 'ativo', render: r => (
-          <span className={`badge ${r.ativo === 'S' ? 'badge-green' : 'badge-grey'}`}>{r.ativo === 'S' ? 'Ativa' : 'Encerrada'}</span>
-        )},
+        {
+          label: 'Status', key: 'ativo', render: r => (
+            <span className={`badge ${r.ativo === 'S' ? 'badge-green' : 'badge-grey'}`}>{r.ativo === 'S' ? 'Ativa' : 'Encerrada'}</span>
+          )
+        },
       ]}
       defaultForm={defaultForm}
       renderForm={(data, onChange) => (

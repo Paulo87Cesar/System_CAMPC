@@ -2,6 +2,25 @@ import { RequestHandler } from 'express';
 import { BaseModel } from '../models/base.model';
 import pool from '../config/database';
 
+// Helper para traduzir erros comuns de SQL para Português-BR
+function handleSqlError(e: any, res: any) {
+  let message = 'Erro ao processar dados.';
+  
+  if (e.code === 'ER_DUP_ENTRY') {
+    message = 'Este registro (CPF/CNPJ/Código) já existe no sistema.';
+  } else if (e.code === 'ER_NO_REFERENCED_ROW_2') {
+    message = 'Não foi possível salvar: registro relacionado não encontrado.';
+  } else if (e.code === 'ER_BAD_FIELD_ERROR') {
+    message = 'Erro técnico: Um dos campos enviados não existe na tabela.';
+  } else if (e.code === 'ER_DATA_TOO_LONG') {
+    message = 'Texto muito longo para um dos campos.';
+  } else if (e.code === 'ER_PARSE_ERROR') {
+    message = 'Erro de sintaxe no comando enviado.';
+  }
+
+  res.status(400).json({ message });
+}
+
 // --- Generic CRUD factory ---
 export function crudController(table: string, idCol: string): Record<string, RequestHandler> {
   return {
@@ -10,16 +29,16 @@ export function crudController(table: string, idCol: string): Record<string, Req
         const rows = await BaseModel.findAll(table);
         res.json(rows);
       } catch (e: any) {
-        res.status(500).json({ message: e.message });
+        handleSqlError(e, res);
       }
     },
     getById: async (req, res) => {
       try {
         const row = await BaseModel.findById(table, idCol, Number(req.params.id));
-        if (!row) { res.status(404).json({ message: 'Not found' }); return; }
+        if (!row) { res.status(404).json({ message: 'Registro não encontrado' }); return; }
         res.json(row);
       } catch (e: any) {
-        res.status(500).json({ message: e.message });
+        handleSqlError(e, res);
       }
     },
     create: async (req, res) => {
@@ -216,7 +235,7 @@ export const DashboardController: Record<string, RequestHandler> = {
       const [[educadoresRow]]: any = await pool.query(`SELECT COUNT(*) AS total FROM educador WHERE ativo = 'S'`);
       const [[empresasRow]]: any = await pool.query(`SELECT COUNT(*) AS total FROM empresa WHERE ativo = 'S'`);
       const [[contratosRow]]: any = await pool.query(`SELECT COUNT(*) AS total FROM contrato_aprendiz WHERE status_contrato = 'Ativo'`);
-      
+
       const [porStatus]: any = await pool.query(
         `SELECT status_processo, COUNT(*) AS total FROM inscricao_2026 GROUP BY status_processo`
       );

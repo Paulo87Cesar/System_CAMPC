@@ -15,11 +15,13 @@ export default function EducadoresPage() {
         { label: 'E-mail', key: 'email' },
         { label: 'Telefone', key: 'telefone' },
         { label: 'Especialidade', key: 'especialidade' },
-        { label: 'Situação', key: 'ativo', render: r => (
-          <span className={`badge ${r.ativo === 'S' ? 'badge-green' : 'badge-grey'}`}>
-            {r.ativo === 'S' ? 'Ativo' : 'Inativo'}
-          </span>
-        )},
+        {
+          label: 'Situação', key: 'ativo', render: r => (
+            <span className={`badge ${r.ativo === 'S' ? 'badge-green' : 'badge-grey'}`}>
+              {r.ativo === 'S' ? 'Ativo' : 'Inativo'}
+            </span>
+          )
+        },
       ]}
       defaultForm={defaultForm}
       renderForm={(data, onChange) => (
