@@ -12,13 +12,31 @@ export class BaseModel {
     return (rows as any[])[0] || null;
   }
 
+  // Lista de campos que vêm de JOINs e não devem ser salvos nas tabelas
+  private static VIRTUAL_FIELDS = [
+    'nome_curso', 'nome_educador', 'nome_jovem', 'nome_empresa', 
+    'nome_projeto', 'nome_programa', 'nome_disciplina', 'matricula_jovem'
+  ];
+
+  private static cleanData(data: Record<string, any>) {
+    const cleaned: Record<string, any> = {};
+    for (const key in data) {
+      if (!this.VIRTUAL_FIELDS.includes(key)) {
+        cleaned[key] = data[key];
+      }
+    }
+    return cleaned;
+  }
+
   static async insert(table: string, data: Record<string, any>) {
-    const [result] = await pool.query(`INSERT INTO ${table} SET ?`, [data]);
+    const safeData = this.cleanData(data);
+    const [result] = await pool.query(`INSERT INTO ${table} SET ?`, [safeData]);
     return result;
   }
 
   static async update(table: string, idCol: string, id: number, data: Record<string, any>) {
-    const [result] = await pool.query(`UPDATE ${table} SET ? WHERE ${idCol} = ?`, [data, id]);
+    const safeData = this.cleanData(data);
+    const [result] = await pool.query(`UPDATE ${table} SET ? WHERE ${idCol} = ?`, [safeData, id]);
     return result;
   }
 
