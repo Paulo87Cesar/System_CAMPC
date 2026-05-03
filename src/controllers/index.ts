@@ -6,16 +6,20 @@ import pool from '../config/database';
 function handleSqlError(e: any, res: any) {
   let message = 'Não foi possível salvar os dados. Verifique os campos e tente novamente.';
   
+  // Tenta extrair o nome da coluna se disponível na mensagem do MySQL
+  const columnMatch = e.sqlMessage ? e.sqlMessage.match(/'([^']+)'/) : null;
+  const columnName = columnMatch ? `[${columnMatch[1]}]` : '';
+
   if (e.code === 'ER_DUP_ENTRY') {
-    message = 'Este registro (CPF, CNPJ ou Código) já existe no sistema.';
+    message = `O valor enviado para o campo ${columnName} já existe no sistema.`;
   } else if (e.code === 'ER_NO_REFERENCED_ROW_2') {
-    message = 'Selecione uma opção válida nos campos de seleção (Curso, Educador, etc).';
+    message = `O registro selecionado no campo ${columnName} não foi encontrado.`;
   } else if (e.code === 'ER_BAD_FIELD_ERROR') {
-    message = 'Erro de estrutura: Um dos campos enviados não é aceito pelo banco de dados.';
+    message = `O campo ${columnName} não é aceito por esta tabela. Verifique a estrutura do banco.`;
   } else if (e.code === 'ER_DATA_TOO_LONG') {
-    message = 'O texto digitado é muito grande para um dos campos.';
+    message = `O texto no campo ${columnName} é muito longo.`;
   } else if (e.code === 'ER_TRUNCATED_WRONG_VALUE' || e.code === 'ER_WRONG_VALUE_COUNT_ON_ROW') {
-    message = 'Valor inválido preenchido em um dos campos (verifique números e datas).';
+    message = `O valor enviado para o campo ${columnName} é inválido para este tipo de coluna.`;
   }
 
   res.status(400).json({ message });
