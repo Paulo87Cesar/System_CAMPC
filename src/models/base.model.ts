@@ -15,7 +15,7 @@ export class BaseModel {
   // Lista de campos que vêm de JOINs e não devem ser salvos nas tabelas
   private static VIRTUAL_FIELDS = [
     'nome_curso', 'nome_educador', 'nome_jovem', 'nome_empresa', 
-    'nome_projeto', 'nome_programa', 'nome_disciplina', 'matricula_jovem'
+    'nome_projeto', 'nome_programa', 'matricula_jovem'
   ];
 
   private static cleanData(data: Record<string, any>) {
