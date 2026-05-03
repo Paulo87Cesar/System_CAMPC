@@ -1,32 +1,45 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { X } from 'lucide-react';
 
-interface Toast { id: number; msg: string; type: 'success' | 'error' | 'info'; }
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
 
-interface ToastCtx { show: (msg: string, type?: Toast['type']) => void; }
+interface ToastContextData {
+  show: (message: string, type?: 'success' | 'error' | 'info') => void;
+}
 
-const Ctx = createContext<ToastCtx>({ show: () => {} });
+const ToastContext = createContext<ToastContextData>({} as ToastContextData);
 
-export const useToast = () => useContext(Ctx);
-
-export function ToastProvider({ children }: { children: React.ReactNode }) {
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const show = useCallback((msg: string, type: Toast['type'] = 'success') => {
+  const hide = useCallback((id: number) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const show = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = Date.now();
-    setToasts(t => [...t, { id, msg, type }]);
-    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500);
+    setToasts(prev => [...prev, { id, message, type }]);
   }, []);
 
   return (
-    <Ctx.Provider value={{ show }}>
+    <ToastContext.Provider value={{ show }}>
       {children}
-      <div className="toast-wrap">
+      <div className="toast-container">
         {toasts.map(t => (
-          <div key={t.id} className={`toast ${t.type}`}>
-            {t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : 'ℹ️'} {t.msg}
+          <div key={t.id} className={`toast toast-${t.type}`}>
+            <span className="toast-message">{t.message}</span>
+            <button className="toast-close" onClick={() => hide(t.id)}>
+              <X size={16} />
+            </button>
           </div>
         ))}
       </div>
-    </Ctx.Provider>
+    </ToastContext.Provider>
   );
-}
+};
+
+export const useToast = () => useContext(ToastContext);
