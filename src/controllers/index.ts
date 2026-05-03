@@ -4,24 +4,27 @@ import pool from '../config/database';
 
 // Helper para traduzir erros comuns de SQL para Português-BR
 function handleSqlError(e: any, res: any) {
-  let message = 'Não foi possível salvar os dados. Verifique os campos e tente novamente.';
-  
-  // Tenta extrair o nome da coluna se disponível na mensagem do MySQL
+  // Tenta extrair o nome da coluna ou valor se disponível na mensagem do MySQL
   const columnMatch = e.sqlMessage ? e.sqlMessage.match(/'([^']+)'/) : null;
   const columnName = columnMatch ? `[${columnMatch[1]}]` : '';
 
+  let message = `Erro técnico (${e.code || 'Desconhecido'}): ${e.sqlMessage || e.message}`;
+  
   if (e.code === 'ER_DUP_ENTRY') {
     message = `O valor enviado para o campo ${columnName} já existe no sistema.`;
   } else if (e.code === 'ER_NO_REFERENCED_ROW_2') {
     message = `O registro selecionado no campo ${columnName} não foi encontrado.`;
   } else if (e.code === 'ER_BAD_FIELD_ERROR') {
     message = `O campo ${columnName} não é aceito por esta tabela. Verifique a estrutura do banco.`;
+  } else if (e.code === 'ER_BAD_NULL_ERROR') {
+    message = `O campo ${columnName} é obrigatório e não pode ficar vazio.`;
   } else if (e.code === 'ER_DATA_TOO_LONG') {
     message = `O texto no campo ${columnName} é muito longo.`;
   } else if (e.code === 'ER_TRUNCATED_WRONG_VALUE' || e.code === 'ER_WRONG_VALUE_COUNT_ON_ROW') {
     message = `O valor enviado para o campo ${columnName} é inválido para este tipo de coluna.`;
   }
 
+  console.error('Final Error Message:', message);
   res.status(400).json({ message });
 }
 
