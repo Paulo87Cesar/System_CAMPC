@@ -3,7 +3,8 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ClipboardList, GraduationCap,
   BookOpen, Layers, Calendar, Award, BookMarked, FileText,
-  LogOut, Building2, Handshake, CheckSquare, AlertTriangle, HeartHandshake, Settings
+  LogOut, Building2, Handshake, CheckSquare, AlertTriangle, HeartHandshake, Settings,
+  Banknote, Receipt
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,7 +16,8 @@ const navItems = [
   { label: 'Educadores', icon: GraduationCap, to: '/educadores' },
   { section: 'Empresas' },
   { label: 'Parceiras', icon: Building2, to: '/empresas' },
-  { label: 'Contratos', icon: Handshake, to: '/contratos' },
+  { label: 'Contratos (Aprendiz)', icon: Handshake, to: '/contratos' },
+  { label: 'Contratos (Estágio)', icon: Handshake, to: '/contratos_estagio' },
   { section: 'Acadêmico' },
   { label: 'Projetos', icon: Layers, to: '/projetos' },
   { label: 'Programas', icon: BookMarked, to: '/programas' },
@@ -29,6 +31,9 @@ const navItems = [
   { label: 'Boletins', icon: FileText, to: '/boletim' },
   { section: 'Serviço Social' },
   { label: 'Atendimentos', icon: HeartHandshake, to: '/social' },
+  { section: 'Financeiro' },
+  { label: 'Folha de Pagto.', icon: Banknote, to: '/folha_pagamento' },
+  { label: 'Faturas', icon: Receipt, to: '/faturas' },
   { section: 'Configurações' },
   { label: 'Usuários', icon: Settings, to: '/usuarios' },
 ];

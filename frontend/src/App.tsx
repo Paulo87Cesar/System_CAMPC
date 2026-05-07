@@ -25,6 +25,11 @@ import OcorrenciasPage from './pages/Ocorrencias';
 import SocialAtendimentosPage from './pages/SocialAtendimentos';
 import UsuariosPage from './pages/Usuarios';
 
+// --- Phase 2 ---
+import FolhaPagamentoPage from './pages/FolhaPagamento';
+import FaturasPage from './pages/Faturas';
+import ContratosEstagioPage from './pages/ContratosEstagio';
+
 function AppRoutes() {
   const { user, loading } = useAuth();
 
@@ -56,6 +61,11 @@ function AppRoutes() {
           <Route path="/ocorrencias" element={<OcorrenciasPage />} />
           <Route path="/social" element={<SocialAtendimentosPage />} />
           <Route path="/usuarios" element={<UsuariosPage />} />
+
+          {/* Phase 2 */}
+          <Route path="/folha_pagamento" element={<FolhaPagamentoPage />} />
+          <Route path="/faturas" element={<FaturasPage />} />
+          <Route path="/contratos_estagio" element={<ContratosEstagioPage />} />
         </Routes>
       </div>
     </div>

@@ -21,8 +21,21 @@ import {
   QuestionarioSocioeconomicoController,
   ParecerSocialController,
   UsuarioController,
-  PerfilAcessoController
+  PerfilAcessoController,
+  EscolaController,
+  ContratoEstagioController,
+  DocumentoContratoController,
+  AssinaturaDigitalController,
+  FolhaPagamentoController,
+  FaturaEmpresaController,
+  EventoFinanceiroController,
+  PlanoContaController,
+  SeguradoraController,
+  SeguroJovemController
 } from '../controllers/index';
+
+import { PdfController } from '../controllers/pdf.controller';
+
 
 import authRoutes from './auth.routes';
 import { authMiddleware } from '../middleware/auth.middleware';
@@ -76,5 +89,21 @@ crudRoutes(router, '/parecer_social', ParecerSocialController);
 
 crudRoutes(router, '/usuarios', UsuarioController);
 crudRoutes(router, '/perfil_acesso', PerfilAcessoController);
+
+// --- Phase 2 ---
+crudRoutes(router, '/escolas', EscolaController);
+crudRoutes(router, '/contrato_estagio', ContratoEstagioController);
+crudRoutes(router, '/documento_contrato', DocumentoContratoController);
+crudRoutes(router, '/assinatura_digital', AssinaturaDigitalController);
+
+crudRoutes(router, '/folha_pagamento', FolhaPagamentoController);
+crudRoutes(router, '/fatura_empresa', FaturaEmpresaController);
+crudRoutes(router, '/evento_financeiro', EventoFinanceiroController);
+crudRoutes(router, '/plano_conta', PlanoContaController);
+crudRoutes(router, '/seguradora', SeguradoraController);
+crudRoutes(router, '/seguro_jovem', SeguroJovemController);
+
+// Custom PDF Route
+router.get('/pdf/recibo_pagamento/:id', PdfController.gerarReciboPagamento);
 
 export default router;

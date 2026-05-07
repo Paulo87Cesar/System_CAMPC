@@ -277,3 +277,17 @@ export const ParecerSocialController = crudController('parecer_social', 'id');
 // --- Phase 1: Usuários e Permissões ---
 export const UsuarioController = crudController('usuario', 'id');
 export const PerfilAcessoController = crudController('perfil_acesso', 'id');
+
+// --- Phase 2: Contratos (Estágio e Outros) ---
+export const EscolaController = crudController('escola', 'id');
+export const ContratoEstagioController = crudController('contrato_estagio', 'id');
+export const DocumentoContratoController = crudController('documento_contrato', 'id');
+export const AssinaturaDigitalController = crudController('assinatura_digital', 'id');
+
+// --- Phase 2: Financeiro ---
+export const FolhaPagamentoController = crudController('folha_pagamento', 'id');
+export const FaturaEmpresaController = crudController('fatura_empresa', 'id');
+export const EventoFinanceiroController = crudController('evento_financeiro', 'id');
+export const PlanoContaController = crudController('plano_conta', 'id');
+export const SeguradoraController = crudController('seguradora', 'id');
+export const SeguroJovemController = crudController('seguro_jovem', 'id');
