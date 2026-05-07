@@ -262,3 +262,18 @@ export const DashboardController: Record<string, RequestHandler> = {
     } catch (e: any) { handleSqlError(e, res); }
   }
 };
+
+// --- Phase 1: Frequência e Ocorrências ---
+export const FrequenciaController = crudController('frequencia', 'id');
+export const OcorrenciaController = crudController('ocorrencia', 'id');
+export const FeriadoController = crudController('feriado', 'id');
+export const FeriasJovemController = crudController('ferias_jovem', 'id');
+
+// --- Phase 1: Social / Psicóloga ---
+export const AtendimentoSocialController = crudController('atendimento_social', 'id');
+export const QuestionarioSocioeconomicoController = crudController('questionario_socioeconomico', 'id');
+export const ParecerSocialController = crudController('parecer_social', 'id');
+
+// --- Phase 1: Usuários e Permissões ---
+export const UsuarioController = crudController('usuario', 'id');
+export const PerfilAcessoController = crudController('perfil_acesso', 'id');

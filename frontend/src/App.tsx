@@ -19,6 +19,12 @@ import BoletimPage from './pages/Boletim';
 import EmpresasPage from './pages/Empresas';
 import ContratosPage from './pages/Contratos';
 
+// --- Phase 1 ---
+import FrequenciasPage from './pages/Frequencias';
+import OcorrenciasPage from './pages/Ocorrencias';
+import SocialAtendimentosPage from './pages/SocialAtendimentos';
+import UsuariosPage from './pages/Usuarios';
+
 function AppRoutes() {
   const { user, loading } = useAuth();
 
@@ -44,6 +50,12 @@ function AppRoutes() {
           <Route path="/boletim" element={<BoletimPage />} />
           <Route path="/empresas" element={<EmpresasPage />} />
           <Route path="/contratos" element={<ContratosPage />} />
+          
+          {/* Phase 1 */}
+          <Route path="/frequencias" element={<FrequenciasPage />} />
+          <Route path="/ocorrencias" element={<OcorrenciasPage />} />
+          <Route path="/social" element={<SocialAtendimentosPage />} />
+          <Route path="/usuarios" element={<UsuariosPage />} />
         </Routes>
       </div>
     </div>

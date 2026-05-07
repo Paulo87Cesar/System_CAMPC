@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, ClipboardList, GraduationCap,
   BookOpen, Layers, Calendar, Award, BookMarked, FileText,
-  LogOut, Building2, Handshake
+  LogOut, Building2, Handshake, CheckSquare, AlertTriangle, HeartHandshake, Settings
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,7 +24,13 @@ const navItems = [
   { label: 'Turmas', icon: Calendar, to: '/turmas' },
   { section: 'Operacional' },
   { label: 'Matrículas', icon: Award, to: '/matriculas' },
+  { label: 'Frequência', icon: CheckSquare, to: '/frequencias' },
+  { label: 'Ocorrências', icon: AlertTriangle, to: '/ocorrencias' },
   { label: 'Boletins', icon: FileText, to: '/boletim' },
+  { section: 'Serviço Social' },
+  { label: 'Atendimentos', icon: HeartHandshake, to: '/social' },
+  { section: 'Configurações' },
+  { label: 'Usuários', icon: Settings, to: '/usuarios' },
 ];
 
 export default function Sidebar() {

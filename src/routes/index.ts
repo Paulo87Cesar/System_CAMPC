@@ -12,7 +12,16 @@ import {
   BoletimController,
   DashboardController,
   EmpresaController,
-  ContratoController
+  ContratoController,
+  FrequenciaController,
+  OcorrenciaController,
+  FeriadoController,
+  FeriasJovemController,
+  AtendimentoSocialController,
+  QuestionarioSocioeconomicoController,
+  ParecerSocialController,
+  UsuarioController,
+  PerfilAcessoController
 } from '../controllers/index';
 
 import authRoutes from './auth.routes';
@@ -54,5 +63,18 @@ router.get('/boletim/matricula/:matriculaId', BoletimController.getByMatricula);
 
 crudRoutes(router, '/empresas', EmpresaController);
 crudRoutes(router, '/contratos', ContratoController);
+
+// --- Phase 1 ---
+crudRoutes(router, '/frequencias', FrequenciaController);
+crudRoutes(router, '/ocorrencias', OcorrenciaController);
+crudRoutes(router, '/feriados', FeriadoController);
+crudRoutes(router, '/ferias_jovem', FeriasJovemController);
+
+crudRoutes(router, '/atendimento_social', AtendimentoSocialController);
+crudRoutes(router, '/questionario_socioeconomico', QuestionarioSocioeconomicoController);
+crudRoutes(router, '/parecer_social', ParecerSocialController);
+
+crudRoutes(router, '/usuarios', UsuarioController);
+crudRoutes(router, '/perfil_acesso', PerfilAcessoController);
 
 export default router;
