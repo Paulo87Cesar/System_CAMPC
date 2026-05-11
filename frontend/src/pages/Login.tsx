@@ -64,6 +64,19 @@ export default function Login() {
           <button type="submit" disabled={loading}>
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
+
+          <div className="login-divider">
+            <span>OU</span>
+          </div>
+
+          <button 
+            type="button" 
+            className="btn-google"
+            onClick={() => window.location.href = `${API_URL}/auth/google`}
+          >
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+            Entrar com Google
+          </button>
         </form>
         
         <div className="login-footer">

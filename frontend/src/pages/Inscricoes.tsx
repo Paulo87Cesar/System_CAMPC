@@ -3,6 +3,14 @@ import CrudPage from '../components/CrudPage';
 import api from '../api';
 import { useToast } from '../context/ToastContext';
 import { CheckCircle } from 'lucide-react';
+import { fetchAddressByCep } from '../utils/viaCep';
+import { maskCep, maskCpf, maskPhone, maskRg } from '../utils/masks';
+
+import { isValidCpf, InscricaoSchema } from '../utils/validation';
+
+
+
+
 
 function statusBadge(s: string) {
   const map: Record<string, string> = { Aprovado: 'badge-green', Pendente: 'badge-yellow', Reprovado: 'badge-red', '1': 'badge-blue' };
@@ -67,6 +75,7 @@ export default function InscricoesPage() {
       endpoint="/inscricoes"
       idKey="id"
       searchKeys={['nome_completo', 'cpf', 'email', 'projeto']}
+      validationSchema={InscricaoSchema}
       columns={[
         { label: 'Nome', key: 'nome_completo', render: r => <button className="link-btn">{r.nome_completo}</button> },
         { label: 'CPF', key: 'cpf' },
@@ -90,11 +99,23 @@ export default function InscricoesPage() {
           </div>
           <div className="form-group">
             <label>CPF</label>
-            <input type="text" value={data.cpf || ''} onChange={e => onChange('cpf', e.target.value)} />
+            <input 
+              type="text" 
+              value={data.cpf || ''} 
+              onChange={e => onChange('cpf', maskCpf(e.target.value))} 
+              style={{ borderColor: data.cpf && !isValidCpf(data.cpf) ? 'var(--red)' : '' }}
+            />
+            {data.cpf && !isValidCpf(data.cpf) && <small style={{ color: 'var(--red)' }}>CPF Inválido</small>}
           </div>
           <div className="form-group">
             <label>RG</label>
-            <input type="text" value={data.rg || ''} onChange={e => onChange('rg', e.target.value)} />
+            <input 
+              type="text" 
+              value={data.rg || ''} 
+              onChange={e => onChange('rg', maskRg(e.target.value))} 
+              style={{ borderColor: data.rg && data.rg.length < 8 ? 'var(--red)' : '' }}
+            />
+            {data.rg && data.rg.length < 8 && <small style={{ color: 'var(--red)' }}>RG inválido ou incompleto</small>}
           </div>
           <div className="form-group">
             <label>Sexo</label>
@@ -112,7 +133,7 @@ export default function InscricoesPage() {
           </div>
           <div className="form-group">
             <label>Telefone</label>
-            <input type="text" value={data.telefone || ''} onChange={e => onChange('telefone', e.target.value)} />
+            <input type="text" value={data.telefone || ''} onChange={e => onChange('telefone', maskPhone(e.target.value))} />
           </div>
           <div className="form-group">
             <label>Projeto</label>
@@ -123,6 +144,25 @@ export default function InscricoesPage() {
             <select value={data.status_processo || 'Pendente'} onChange={e => onChange('status_processo', e.target.value)}>
               <option>Pendente</option><option>Aprovado</option><option>Reprovado</option>
             </select>
+          </div>
+          <div className="form-group">
+            <label>CEP</label>
+            <input 
+              type="text" 
+              value={data.end_cep || ''} 
+              onChange={e => onChange('end_cep', maskCep(e.target.value))} 
+              onBlur={async (e) => {
+                const cep = e.target.value;
+                if (cep.length >= 8) {
+                  const address = await fetchAddressByCep(cep);
+                  if (address) {
+                    onChange('end_logradouro', address.logradouro);
+                    onChange('end_bairro', address.bairro);
+                    onChange('end_cidade', `${address.localidade} - ${address.uf}`);
+                  }
+                }
+              }}
+            />
           </div>
           <div className="form-group span-2">
             <label>Endereço</label>

@@ -21,3 +21,19 @@ export const authMiddleware = (req: any, res: Response, next: NextFunction) => {
     res.status(401).json({ message: 'Token inválido ou expirado' });
   }
 };
+
+export const permitirAcesso = (niveisPermitidos: string[]) => {
+  return (req: any, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'Usuário não autenticado' });
+      return;
+    }
+    
+    const { role } = req.user;
+    if (niveisPermitidos.includes(role)) {
+      return next();
+    }
+    
+    res.status(403).json({ message: "Acesso negado para o seu departamento." });
+  };
+};

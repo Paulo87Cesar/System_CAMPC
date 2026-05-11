@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
 import api from '../api';
 import { useToast } from '../context/ToastContext';
+import { z } from 'zod';
+
 
 interface Column<T> {
   label: string;
@@ -19,10 +21,11 @@ interface CrudPageProps<T extends Record<string, any>> {
   renderForm: (data: Partial<T>, onChange: (field: string, val: any) => void) => React.ReactNode;
   searchKeys?: (keyof T)[];
   extraActions?: (row: T) => React.ReactNode;
+  validationSchema?: z.ZodSchema<any>;
 }
 
 export default function CrudPage<T extends Record<string, any>>({
-  title, endpoint, idKey, columns, defaultForm, renderForm, searchKeys = [], extraActions
+  title, endpoint, idKey, columns, defaultForm, renderForm, searchKeys = [], extraActions, validationSchema
 }: CrudPageProps<T>) {
   const { show } = useToast();
   const [rows, setRows] = useState<T[]>([]);
@@ -62,6 +65,16 @@ export default function CrudPage<T extends Record<string, any>>({
 
   const handleSave = async () => {
     try {
+      // Optional Zod Validation
+      if (validationSchema) {
+        const result = validationSchema.safeParse(modal.data);
+        if (!result.success) {
+          const errorMsg = result.error.errors[0].message;
+          show(errorMsg, 'error');
+          return;
+        }
+      }
+
       if (modal.editing) {
         await api.put(`${endpoint}/${modal.data[idKey]}`, modal.data);
         show('Registro atualizado!');

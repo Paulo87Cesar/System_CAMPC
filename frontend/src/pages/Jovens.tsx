@@ -1,5 +1,13 @@
 import React from 'react';
 import CrudPage from '../components/CrudPage';
+import { fetchAddressByCep } from '../utils/viaCep';
+import { maskCep, maskCpf, maskPhone, maskRg } from '../utils/masks';
+
+import { isValidCpf, JovemSchema } from '../utils/validation';
+
+
+
+
 
 function badge(s: string) {
   if (!s || s === 'N') return <span className="badge badge-green">Ativo</span>;
@@ -27,6 +35,7 @@ export default function JovensPage() {
       endpoint="/jovens"
       idKey="id_jovem"
       searchKeys={['nome_completo', 'cpf', 'email', 'municipio']}
+      validationSchema={JovemSchema}
       columns={[
         { label: 'Nome', key: 'nome_completo', render: r => <button className="link-btn">{r.nome_completo}</button> },
         { label: 'CPF', key: 'cpf' },
@@ -47,11 +56,24 @@ export default function JovensPage() {
             </div>
             <div className="form-group">
               <label>CPF</label>
-              <input type="text" value={data.cpf || ''} onChange={e => onChange('cpf', e.target.value)} placeholder="000.000.000-00" />
+              <input 
+                type="text" 
+                value={data.cpf || ''} 
+                onChange={e => onChange('cpf', maskCpf(e.target.value))} 
+                placeholder="000.000.000-00" 
+                style={{ borderColor: data.cpf && !isValidCpf(data.cpf) ? 'var(--red)' : '' }}
+              />
+              {data.cpf && !isValidCpf(data.cpf) && <small style={{ color: 'var(--red)' }}>CPF Inválido</small>}
             </div>
             <div className="form-group">
               <label>RG</label>
-              <input type="text" value={data.rg || ''} onChange={e => onChange('rg', e.target.value)} />
+              <input 
+                type="text" 
+                value={data.rg || ''} 
+                onChange={e => onChange('rg', maskRg(e.target.value))} 
+                style={{ borderColor: data.rg && data.rg.length < 8 ? 'var(--red)' : '' }}
+              />
+              {data.rg && data.rg.length < 8 && <small style={{ color: 'var(--red)' }}>RG inválido ou incompleto</small>}
             </div>
             <div className="form-group">
               <label>Nascimento</label>
@@ -70,15 +92,30 @@ export default function JovensPage() {
             </div>
             <div className="form-group">
               <label>Telefone</label>
-              <input type="text" value={data.telefone || ''} onChange={e => onChange('telefone', e.target.value)} />
+              <input type="text" value={data.telefone || ''} onChange={e => onChange('telefone', maskPhone(e.target.value))} />
             </div>
             <div className="form-group">
               <label>Celular</label>
-              <input type="text" value={data.celular || ''} onChange={e => onChange('celular', e.target.value)} />
+              <input type="text" value={data.celular || ''} onChange={e => onChange('celular', maskPhone(e.target.value))} />
             </div>
             <div className="form-group">
               <label>CEP</label>
-              <input type="text" value={data.cep || ''} onChange={e => onChange('cep', e.target.value)} />
+              <input 
+                type="text" 
+                value={data.cep || ''} 
+                onChange={e => onChange('cep', maskCep(e.target.value))} 
+                onBlur={async (e) => {
+                  const cep = e.target.value;
+                  if (cep.length >= 8) {
+                    const address = await fetchAddressByCep(cep);
+                    if (address) {
+                      onChange('endereco', address.logradouro);
+                      onChange('bairro', address.bairro);
+                      onChange('municipio', `${address.localidade} - ${address.uf}`);
+                    }
+                  }
+                }}
+              />
             </div>
             <div className="form-group span-2">
               <label>Endereço</label>

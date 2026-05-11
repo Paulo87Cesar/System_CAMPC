@@ -1,5 +1,9 @@
 import React from 'react';
 import CrudPage from '../components/CrudPage';
+import { maskCnpj, maskPhone } from '../utils/masks';
+import { isValidCnpj, EmpresaSchema } from '../utils/validation';
+
+
 
 interface Empresa {
   id_empresa?: number;
@@ -32,6 +36,7 @@ export default function EmpresasPage() {
       endpoint="/empresas"
       idKey="id_empresa"
       searchKeys={['razao_social', 'nome_fantasia', 'cnpj']}
+      validationSchema={EmpresaSchema}
       columns={[
         { label: 'Nome Fantasia', key: 'nome_fantasia', render: r => <button className="link-btn">{r.nome_fantasia || r.razao_social}</button> },
         { label: 'CNPJ', key: 'cnpj' },
@@ -55,7 +60,14 @@ export default function EmpresasPage() {
           </div>
           <div className="form-group">
             <label>CNPJ *</label>
-            <input type="text" value={data.cnpj || ''} onChange={e => onChange('cnpj', e.target.value)} placeholder="00.000.000/0000-00" />
+            <input 
+              type="text" 
+              value={data.cnpj || ''} 
+              onChange={e => onChange('cnpj', maskCnpj(e.target.value))} 
+              placeholder="00.000.000/0000-00"
+              style={{ borderColor: data.cnpj && !isValidCnpj(data.cnpj) ? 'var(--red)' : '' }}
+            />
+            {data.cnpj && !isValidCnpj(data.cnpj) && <small style={{ color: 'var(--red)' }}>CNPJ Inválido</small>}
           </div>
           <div className="form-group">
             <label>Cota de Aprendizes</label>
@@ -67,7 +79,7 @@ export default function EmpresasPage() {
           </div>
           <div className="form-group">
             <label>Telefone</label>
-            <input type="text" value={data.telefone || ''} onChange={e => onChange('telefone', e.target.value)} />
+            <input type="text" value={data.telefone || ''} onChange={e => onChange('telefone', maskPhone(e.target.value))} />
           </div>
           <div className="form-group span-2">
             <label>Responsável RH</label>

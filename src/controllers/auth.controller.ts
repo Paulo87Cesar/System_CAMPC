@@ -1,16 +1,34 @@
-import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import pool from '../config/database';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
+export async function determinarNivelAcesso(email: string) {
+  try {
+    const [rows]: any = await pool.query(
+      `SELECT p.nome as role 
+       FROM usuario u 
+       JOIN perfil_acesso p ON u.perfil_id = p.id 
+       WHERE u.email = ? AND u.ativo = 1`,
+      [email]
+    );
 
-export const AuthController: Record<string, RequestHandler> = {
-  login: async (req, res) => {
+    if (rows.length > 0) {
+      return rows[0].role.toLowerCase();
+    }
+    
+    return 'educador'; // Padrão se não encontrado ou inativo
+  } catch (error) {
+    console.error('Erro ao determinar nível de acesso:', error);
+    return 'educador';
+  }
+}
+
+export const AuthController: any = {
+  login: async (req: any, res: any) => {
     const { username, password } = req.body;
+    const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+    const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+    const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 
-    // Simplificação solicitada: nível administrador
     if (username === ADMIN_USER && password === ADMIN_PASS) {
       const token = jwt.sign(
         { id: 0, username: ADMIN_USER, role: 'admin' },
@@ -28,7 +46,23 @@ export const AuthController: Record<string, RequestHandler> = {
     res.status(401).json({ message: 'Usuário ou senha inválidos' });
   },
 
-  me: async (req: any, res) => {
+  googleCallback: async (req: any, res: any) => {
+    const user = req.user as any;
+    const email = user.emails[0].value;
+    
+    const nivel = await determinarNivelAcesso(email);
+
+    const token = jwt.sign(
+      { id: user.id, email: email, role: nivel },
+      process.env.JWT_SECRET!,
+      { expiresIn: '8h' }
+    );
+
+    // Redireciona para o frontend com o token
+    res.redirect(`http://localhost:5173/login-success?token=${token}`);
+  },
+
+  me: async (req: any, res: any) => {
     res.json({ user: req.user });
   }
 };
