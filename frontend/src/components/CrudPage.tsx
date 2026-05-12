@@ -62,14 +62,14 @@ export default function CrudPage<T extends Record<string, any>>({
 
   const handleChange = (field: string, val: any) =>
     setModal(m => ({ ...m, data: { ...m.data, [field]: val } }));
-
-  const handleSave = async () => {
+const handleSave = async () => {
     try {
-      // Optional Zod Validation
+      // Validação Zod Corrigida
       if (validationSchema) {
         const result = validationSchema.safeParse(modal.data);
         if (!result.success) {
-          const errorMsg = result.error.errors[0].message;
+          // O Zod usa 'issues' para listar os erros
+          const errorMsg = result.error.issues[0].message;
           show(errorMsg, 'error');
           return;
         }
