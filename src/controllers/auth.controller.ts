@@ -59,7 +59,9 @@ export const AuthController: any = {
     );
 
     // Redireciona para o frontend com o token
-    res.redirect(`http://localhost:5173/login-success?token=${token}`);
+    // FRONTEND_URL define a URL base do frontend (ex.: https://sys.patrulheiros.org.br)
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/login-success?token=${token}`);
   },
 
   me: async (req: any, res: any) => {
