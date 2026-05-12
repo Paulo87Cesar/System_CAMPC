@@ -11,6 +11,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
+// Necessário para funcionar corretamente atrás do NGINX (proxy reverso)
+if (isProd) {
+  app.set('trust proxy', 1);
+}
+
 app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());

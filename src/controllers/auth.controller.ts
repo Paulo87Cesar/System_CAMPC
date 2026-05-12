@@ -49,11 +49,12 @@ export const AuthController: any = {
   googleCallback: async (req: any, res: any) => {
     const user = req.user as any;
     const email = user.emails[0].value;
+    const displayName = user.displayName || email.split('@')[0];
     
     const nivel = await determinarNivelAcesso(email);
 
     const token = jwt.sign(
-      { id: user.id, email: email, role: nivel },
+      { id: user.id, username: displayName, email: email, role: nivel },
       process.env.JWT_SECRET!,
       { expiresIn: '8h' }
     );
@@ -65,6 +66,12 @@ export const AuthController: any = {
   },
 
   me: async (req: any, res: any) => {
-    res.json({ user: req.user });
+    const u = req.user as any;
+    res.json({
+      user: {
+        username: u.username || u.email || 'Usuário',
+        role: u.role || 'educador'
+      }
+    });
   }
 };

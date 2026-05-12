@@ -7,7 +7,7 @@ function statusBadge(s: string) {
 }
 
 const defaultForm = {
-  competencia: '', contrato_id: '', valor_bruto: 0, descontos: 0, valor_liquido: 0, status: 'pendente', data_pagamento: ''
+  id: 0, competencia: '', contrato_id: '', valor_bruto: 0, descontos: 0, valor_liquido: 0, status: 'pendente', data_pagamento: ''
 };
 
 export default function FolhaPagamentoPage() {
