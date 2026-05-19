@@ -18,9 +18,13 @@ export class BaseModel {
     'nome_projeto', 'nome_programa', 'matricula_jovem'
   ];
 
-  private static cleanData(data: Record<string, any>) {
+  private static cleanData(table: string, data: Record<string, any>) {
     const cleaned: Record<string, any> = {};
     for (const key in data) {
+      if (table === 'curso' && key === 'nome_curso') { cleaned[key] = data[key]; continue; }
+      if (table === 'projeto' && key === 'nome_projeto') { cleaned[key] = data[key]; continue; }
+      if (table === 'programa' && key === 'nome_programa') { cleaned[key] = data[key]; continue; }
+
       if (!this.VIRTUAL_FIELDS.includes(key)) {
         cleaned[key] = data[key];
       }
@@ -29,13 +33,13 @@ export class BaseModel {
   }
 
   static async insert(table: string, data: Record<string, any>) {
-    const safeData = this.cleanData(data);
+    const safeData = this.cleanData(table, data);
     const [result] = await pool.query(`INSERT INTO ${table} SET ?`, [safeData]);
     return result;
   }
 
   static async update(table: string, idCol: string, id: number, data: Record<string, any>) {
-    const safeData = this.cleanData(data);
+    const safeData = this.cleanData(table, data);
     const [result] = await pool.query(`UPDATE ${table} SET ? WHERE ${idCol} = ?`, [safeData, id]);
     return result;
   }

@@ -166,7 +166,7 @@ const handleSave = async () => {
       </div>
 
       {modal.open && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && closeModal()}>
+        <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
               <span className="modal-title">{modal.editing ? 'Editar' : 'Novo'} {title}</span>

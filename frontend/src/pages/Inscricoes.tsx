@@ -177,6 +177,10 @@ export default function InscricoesPage() {
             <input type="text" value={data.end_cidade || ''} onChange={e => onChange('end_cidade', e.target.value)} />
           </div>
           <div className="form-group">
+            <label>Escolaridade</label>
+            <input type="text" value={data.escola_escolaridade || ''} onChange={e => onChange('escola_escolaridade', e.target.value)} />
+          </div>
+          <div className="form-group">
             <label>Escola</label>
             <input type="text" value={data.escola_nome || ''} onChange={e => onChange('escola_nome', e.target.value)} />
           </div>

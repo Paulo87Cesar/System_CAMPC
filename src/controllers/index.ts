@@ -81,8 +81,9 @@ export const JovemController: Record<string, RequestHandler> = {
   getAll: async (_req, res) => {
     try {
       const [rows] = await pool.query(
-        `SELECT id_jovem, matricula, nome_completo, cpf, genero, municipio,
-                email, telefone, celular, aprovacao_status, inativo, data_cadastro
+        `SELECT *, DATE_FORMAT(nascimento, '%Y-%m-%d') as nascimento,
+                   DATE_FORMAT(data_cadastro, '%Y-%m-%d') as data_cadastro,
+                   DATE_FORMAT(data_emissao_rg, '%Y-%m-%d') as data_emissao_rg
          FROM cadastro_jovem ORDER BY nome_completo`
       );
       res.json(rows);
@@ -90,17 +91,49 @@ export const JovemController: Record<string, RequestHandler> = {
   }
 };
 
+async function syncJovemAprovado(id: number) {
+  const [inscRows] = await pool.query(`SELECT * FROM inscricao_2026 WHERE id = ?`, [id]) as any[];
+  const insc = inscRows[0];
+  if (!insc || insc.status_processo !== 'Aprovado') return;
+
+  const [jovemRows] = await pool.query(`SELECT id_jovem FROM cadastro_jovem WHERE id_inscricao = ?`, [id]) as any[];
+  if (jovemRows.length > 0) return; // already exists
+
+  await pool.query(
+    `INSERT INTO cadastro_jovem (
+      id_inscricao, nome_completo, cpf, rg, data_cadastro, genero, nascimento, 
+      estado_civil, cor_raca, destro_canhoto, pcd, deficiencia_descricao, 
+      telefone, celular, email, cep, endereco, numero, bairro, municipio, 
+      escolaridade, escola, periodo, serie, ra, ja_trabalhou, ctps_assinada, aprovacao_status
+    ) VALUES (?, ?, ?, ?, CURDATE(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Aprovado')`,
+    [
+      insc.id, insc.nome_completo, insc.cpf, insc.rg, insc.sexo, insc.data_nascimento,
+      insc.estado_civil, insc.cor_raca, insc.destro_canhoto, insc.is_deficiente, insc.deficiencia_descricao,
+      insc.telefone, insc.tel_contato, insc.email, insc.end_cep, insc.end_logradouro, insc.end_numero, insc.end_bairro, insc.end_cidade,
+      insc.escola_escolaridade, insc.escola_nome, insc.escola_periodo, insc.escola_serie, insc.escola_ra, insc.ja_trabalhou, insc.ctps_assinada
+    ]
+  );
+}
+
 // --- Inscrições controller ---
 export const InscricaoController: Record<string, RequestHandler> = {
   ...crudController('inscricao_2026', 'id'),
   getAll: async (_req, res) => {
     try {
       const [rows] = await pool.query(
-        `SELECT id, nome_completo, cpf, data_nascimento, projeto, email,
-                telefone, status_processo, data_cadastro
+        `SELECT *, DATE_FORMAT(data_nascimento, '%Y-%m-%d') as data_nascimento 
          FROM inscricao_2026 ORDER BY data_cadastro DESC`
       );
       res.json(rows);
+    } catch (e: any) { handleSqlError(e, res); }
+  },
+  update: async (req, res) => {
+    try {
+      await BaseModel.update('inscricao_2026', 'id', Number(req.params.id), req.body);
+      if (req.body.status_processo === 'Aprovado') {
+        await syncJovemAprovado(Number(req.params.id));
+      }
+      res.json({ message: 'Updated successfully' });
     } catch (e: any) { handleSqlError(e, res); }
   },
   aprovar: async (req, res) => {
@@ -109,7 +142,8 @@ export const InscricaoController: Record<string, RequestHandler> = {
         `UPDATE inscricao_2026 SET status_processo = 'Aprovado' WHERE id = ?`,
         [req.params.id]
       );
-      res.json({ message: 'Inscrição aprovada — jovem criado via trigger' });
+      await syncJovemAprovado(Number(req.params.id));
+      res.json({ message: 'Inscrição aprovada e jovem cadastrado!' });
     } catch (e: any) { handleSqlError(e, res); }
   }
 };
@@ -118,7 +152,21 @@ export const InscricaoController: Record<string, RequestHandler> = {
 export const EducadorController = crudController('educador', 'id_educador');
 
 // --- Projetos ---
-export const ProjetoController = crudController('projeto', 'id_projeto');
+export const ProjetoController: Record<string, RequestHandler> = {
+  ...crudController('projeto', 'id_projeto'),
+  getAll: async (_req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT id_projeto, nome_projeto, descricao, 
+                DATE_FORMAT(data_inicio, '%Y-%m-%d') as data_inicio, 
+                DATE_FORMAT(data_fim, '%Y-%m-%d') as data_fim, 
+                ativo, criado_em 
+         FROM projeto ORDER BY id_projeto DESC`
+      );
+      res.json(rows);
+    } catch (e: any) { handleSqlError(e, res); }
+  }
+};
 
 // --- Programas ---
 export const ProgramaController: Record<string, RequestHandler> = {
@@ -141,7 +189,7 @@ export const CursoController: Record<string, RequestHandler> = {
     try {
       const [rows] = await pool.query(
         `SELECT c.*, pg.nome_programa FROM curso c
-         JOIN programa pg ON pg.id_programa = c.id_programa ORDER BY c.nome_curso`
+         LEFT JOIN programa pg ON pg.id_programa = c.id_programa ORDER BY c.nome_curso`
       );
       res.json(rows);
     } catch (e: any) { handleSqlError(e, res); }
