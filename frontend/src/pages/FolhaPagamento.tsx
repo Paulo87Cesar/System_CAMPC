@@ -7,7 +7,7 @@ function statusBadge(s: string) {
 }
 
 const defaultForm = {
-  id: 0, competencia: '', contrato_id: '', valor_bruto: 0, descontos: 0, valor_liquido: 0, status: 'pendente', data_pagamento: ''
+  id: 0, competencia: '', contrato_aprendiz_id: '', contrato_estagio_id: '', valor_bruto: 0, descontos: 0, valor_liquido: 0, status: 'pendente', data_pagamento: ''
 };
 
 export default function FolhaPagamentoPage() {
@@ -24,7 +24,7 @@ export default function FolhaPagamentoPage() {
       searchKeys={['competencia']}
       columns={[
         { label: 'Competência', key: 'competencia' },
-        { label: 'Contrato ID', key: 'contrato_id' },
+        { label: 'Contrato (Ap/Est)', key: 'contrato', render: r => r.contrato_aprendiz_id ? `Ap: ${r.contrato_aprendiz_id}` : `Est: ${r.contrato_estagio_id}` },
         { label: 'Líquido (R$)', key: 'valor_liquido', render: r => `R$ ${Number(r.valor_liquido).toFixed(2)}` },
         { label: 'Status', key: 'status', render: r => statusBadge(r.status) },
         { 
@@ -60,8 +60,12 @@ export default function FolhaPagamentoPage() {
                 <input type="month" value={data.competencia || ''} onChange={e => onChange('competencia', e.target.value)} required />
               </div>
               <div className="form-group">
-                <label>ID do Contrato *</label>
-                <input type="number" value={data.contrato_id || ''} onChange={e => onChange('contrato_id', Number(e.target.value))} required />
+                <label>ID Contrato Aprendiz</label>
+                <input type="number" value={data.contrato_aprendiz_id || ''} onChange={e => onChange('contrato_aprendiz_id', Number(e.target.value))} />
+              </div>
+              <div className="form-group">
+                <label>ID Contrato Estágio</label>
+                <input type="number" value={data.contrato_estagio_id || ''} onChange={e => onChange('contrato_estagio_id', Number(e.target.value))} />
               </div>
               <div className="form-group">
                 <label>Valor Bruto (R$) *</label>

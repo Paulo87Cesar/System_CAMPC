@@ -37,6 +37,7 @@ export default function JovensPage() {
       searchKeys={['nome_completo', 'cpf', 'email', 'municipio']}
       validationSchema={JovemSchema}
       columns={[
+        { label: 'Matrícula', key: 'matricula' },
         { label: 'Nome', key: 'nome_completo', render: r => <button className="link-btn">{r.nome_completo}</button> },
         { label: 'CPF', key: 'cpf' },
         { label: 'Gênero', key: 'genero' },
@@ -44,16 +45,36 @@ export default function JovensPage() {
         { label: 'E-mail', key: 'email' },
         { label: 'Status', key: 'aprovacao_status', render: r => approvalBadge(r.aprovacao_status) },
         { label: 'Situação', key: 'inativo', render: r => badge(r.inativo), width: '80px' },
+        { 
+          label: 'Ações', 
+          key: 'acoes', 
+          render: r => (
+            <button 
+              className="btn-secondary" 
+              style={{ padding: '4px 8px', fontSize: '12px' }} 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                window.open(`/jovens/${r.id_jovem}/historico`, '_self'); 
+              }}
+            >
+              📖 Histórico
+            </button>
+          ) 
+        },
       ]}
       defaultForm={defaultForm}
       renderForm={(data, onChange) => (
         <>
           <p style={{ fontWeight: 600, marginBottom: 12, color: 'var(--blue-brand)' }}>📋 Dados Pessoais</p>
           <div className="form-grid">
-            <div className="form-group span-2">
-              <label>Nome Completo *</label>
-              <input type="text" value={data.nome_completo || ''} onChange={e => onChange('nome_completo', e.target.value)} />
-            </div>
+            <div className="form-group">
+            <label>Matrícula</label>
+            <input type="text" value={data.matricula || ''} disabled />
+          </div>
+          <div className="form-group span-2">
+            <label>Nome Completo *</label>
+            <input type="text" value={data.nome_completo || ''} onChange={e => onChange('nome_completo', e.target.value)} />
+          </div>
             <div className="form-group">
               <label>CPF</label>
               <input 

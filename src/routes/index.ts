@@ -61,15 +61,19 @@ router.get('/dashboard/stats', DashboardController.stats);
 
 // Módulos
 crudRoutes(router, '/jovens', JovemController);
+router.get('/jovens/:id/historico', JovemController.getHistorico);
+
 crudRoutes(router, '/inscricoes', InscricaoController);
 router.patch('/inscricoes/:id/aprovar', InscricaoController.aprovar);
 
 crudRoutes(router, '/educadores', EducadorController);
 crudRoutes(router, '/projetos', ProjetoController);
+router.get('/projetos/:id/indicadores', ProjetoController.getIndicadores);
 crudRoutes(router, '/programas', ProgramaController);
 crudRoutes(router, '/cursos', CursoController);
 crudRoutes(router, '/disciplinas', DisciplinaController);
 crudRoutes(router, '/turmas', TurmaController);
+router.get('/turmas/:id/diario', TurmaController.getDiario);
 crudRoutes(router, '/matriculas', MatriculaController);
 crudRoutes(router, '/boletim', BoletimController);
 router.get('/boletim/matricula/:matriculaId', BoletimController.getByMatricula);

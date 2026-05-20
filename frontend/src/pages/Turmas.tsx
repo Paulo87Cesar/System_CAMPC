@@ -53,6 +53,22 @@ export default function TurmasPage() {
             <span className={`badge ${r.ativo === 'S' ? 'badge-green' : 'badge-grey'}`}>{r.ativo === 'S' ? 'Ativa' : 'Encerrada'}</span>
           )
         },
+        { 
+          label: 'Ações', 
+          key: 'acoes', 
+          render: r => (
+            <button 
+              className="btn-secondary" 
+              style={{ padding: '4px 8px', fontSize: '12px' }} 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                window.open(`/turmas/${r.id_turma}/diario`, '_self'); 
+              }}
+            >
+              📓 Diário
+            </button>
+          ) 
+        },
       ]}
       defaultForm={defaultForm}
       renderForm={(data, onChange) => (

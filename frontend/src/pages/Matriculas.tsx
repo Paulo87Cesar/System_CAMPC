@@ -7,8 +7,9 @@ interface Turma { id_turma: number; codigo_turma: string; }
 
 interface Matricula {
   id_matricula?: number;
-  id_jovem: string | number;
-  id_turma: string | number;
+  id_jovem?: string | number;
+  id_turma?: string | number;
+  matricula?: string;
   data_matricula: string;
   status_matricula: string;
   observacoes?: string;
@@ -44,8 +45,9 @@ export default function MatriculasPage() {
       title="Matrículas"
       endpoint="/matriculas"
       idKey="id_matricula"
-      searchKeys={['nome_jovem', 'codigo_turma']}
+      searchKeys={['nome_jovem', 'codigo_turma', 'matricula']}
       columns={[
+        { label: 'Matrícula', key: 'matricula' },
         { label: 'Jovem', key: 'nome_jovem', render: r => <button className="link-btn">{r.nome_jovem}</button> },
         { label: 'Turma', key: 'codigo_turma' },
         { label: 'Data Matrícula', key: 'data_matricula', render: r => r.data_matricula ? new Date(r.data_matricula).toLocaleDateString('pt-BR') : '-' },
@@ -69,6 +71,10 @@ export default function MatriculasPage() {
             </select>
           </div>
           <div className="form-grid">
+            <div className="form-group span-2">
+              <label>Matrícula (gerada)</label>
+              <input type="text" value={data.matricula || ''} disabled />
+            </div>
             <div className="form-group">
               <label>Data de Matrícula</label>
               <input type="date" value={data.data_matricula || ''} onChange={e => onChange('data_matricula', e.target.value)} />

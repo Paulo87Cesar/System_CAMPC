@@ -7,11 +7,16 @@ export const PdfController: Record<string, RequestHandler> = {
     try {
       const { id } = req.params;
       const [rows]: any = await pool.query(
-        `SELECT f.*, c.cargo, j.nome_completo, j.cpf, e.nome_fantasia 
+        `SELECT f.*, 
+                COALESCE(ca.cargo, 'Estagiário') AS cargo, 
+                j.nome_completo, j.cpf, 
+                COALESCE(e1.nome_fantasia, e2.nome_fantasia) AS nome_fantasia
          FROM folha_pagamento f
-         JOIN contrato_aprendiz c ON c.id_contrato = f.contrato_id
-         JOIN cadastro_jovem j ON j.id_jovem = c.id_jovem
-         JOIN empresa e ON e.id_empresa = c.id_empresa
+         LEFT JOIN contrato_aprendiz ca ON ca.id_contrato = f.contrato_aprendiz_id
+         LEFT JOIN contrato_estagio ce ON ce.id = f.contrato_estagio_id
+         JOIN cadastro_jovem j ON j.id_jovem = COALESCE(ca.id_jovem, ce.jovem_id)
+         LEFT JOIN empresa e1 ON e1.id_empresa = ca.id_empresa
+         LEFT JOIN empresa e2 ON e2.id_empresa = ce.empresa_id
          WHERE f.id = ?`,
         [id]
       );

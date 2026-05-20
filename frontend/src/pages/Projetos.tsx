@@ -19,6 +19,22 @@ export default function ProjetosPage() {
             {r.ativo === 'S' ? 'Ativo' : 'Encerrado'}
           </span>
         )},
+        { 
+          label: 'Ações', 
+          key: 'acoes', 
+          render: r => (
+            <button 
+              className="btn-secondary" 
+              style={{ padding: '4px 8px', fontSize: '12px' }} 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                window.open(`/projetos/${r.id_projeto}/indicadores`, '_self'); 
+              }}
+            >
+              📊 Indicadores
+            </button>
+          ) 
+        },
       ]}
       defaultForm={defaultForm}
       renderForm={(data, onChange) => (

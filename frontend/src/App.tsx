@@ -9,13 +9,16 @@ import LoginSuccess from './pages/LoginSuccess';
 
 import Dashboard from './pages/Dashboard';
 import JovensPage from './pages/Jovens';
+import JovemHistorico from './pages/JovemHistorico';
 import InscricoesPage from './pages/Inscricoes';
 import EducadoresPage from './pages/Educadores';
 import ProjetosPage from './pages/Projetos';
+import ProjetoIndicadores from './pages/ProjetoIndicadores';
 import ProgramasPage from './pages/Programas';
 import CursosPage from './pages/Cursos';
 import DisciplinasPage from './pages/Disciplinas';
 import TurmasPage from './pages/Turmas';
+import TurmaDiario from './pages/TurmaDiario';
 import MatriculasPage from './pages/Matriculas';
 import BoletimPage from './pages/Boletim';
 import EmpresasPage from './pages/Empresas';
@@ -51,13 +54,16 @@ function AppRoutes() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/jovens" element={<JovensPage />} />
+                <Route path="/jovens/:id/historico" element={<JovemHistorico />} />
                 <Route path="/inscricoes" element={<InscricoesPage />} />
                 <Route path="/educadores" element={<EducadoresPage />} />
                 <Route path="/projetos" element={<ProjetosPage />} />
+                <Route path="/projetos/:id/indicadores" element={<ProjetoIndicadores />} />
                 <Route path="/programas" element={<ProgramasPage />} />
                 <Route path="/cursos" element={<CursosPage />} />
                 <Route path="/disciplinas" element={<DisciplinasPage />} />
                 <Route path="/turmas" element={<TurmasPage />} />
+                <Route path="/turmas/:id/diario" element={<TurmaDiario />} />
                 <Route path="/matriculas" element={<MatriculasPage />} />
                 <Route path="/boletim" element={<BoletimPage />} />
                 <Route path="/empresas" element={<EmpresasPage />} />

@@ -10,8 +10,9 @@ SET FOREIGN_KEY_CHECKS=0;
 --  0. MÓDULO BASE (Inscrições, Jovens, Cursos e Turmas)
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS `inscricao_2026` (
+CREATE TABLE IF NOT EXISTS `inscricao` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `ano_processo` int DEFAULT 2026,
   `nome_completo` varchar(150) DEFAULT NULL,
   `cpf` varchar(14) DEFAULT NULL,
   `rg` varchar(20) DEFAULT NULL,
@@ -70,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `inscricao_familia` (
   `salario_parente` decimal(10,2) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_inscricao` (`id_inscricao`),
-  CONSTRAINT `inscricao_familia_ibfk_1` FOREIGN KEY (`id_inscricao`) REFERENCES `inscricao_2026` (`id`) ON DELETE CASCADE
+  CONSTRAINT `inscricao_familia_ibfk_1` FOREIGN KEY (`id_inscricao`) REFERENCES `inscricao` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `cadastro_jovem` (
@@ -148,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `cadastro_jovem` (
   UNIQUE KEY `matricula` (`matricula`),
   UNIQUE KEY `cpf` (`cpf`),
   KEY `id_inscricao` (`id_inscricao`),
-  CONSTRAINT `cadastro_jovem_ibfk_1` FOREIGN KEY (`id_inscricao`) REFERENCES `inscricao_2026` (`id`) ON DELETE SET NULL
+  CONSTRAINT `cadastro_jovem_ibfk_1` FOREIGN KEY (`id_inscricao`) REFERENCES `inscricao` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `educador` (
@@ -512,7 +513,8 @@ CREATE TABLE IF NOT EXISTS `evento_financeiro` (
 
 CREATE TABLE IF NOT EXISTS `folha_pagamento` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `contrato_id` INT NOT NULL,
+  `contrato_aprendiz_id` INT DEFAULT NULL,
+  `contrato_estagio_id` INT DEFAULT NULL,
   `competencia` VARCHAR(7) NOT NULL,
   `valor_bruto` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `descontos` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -521,7 +523,10 @@ CREATE TABLE IF NOT EXISTS `folha_pagamento` (
   `data_pagamento` DATE DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_folha_contrato_comp` (`contrato_id`, `competencia`)
+  UNIQUE KEY `uq_folha_aprendiz_comp` (`contrato_aprendiz_id`, `competencia`),
+  UNIQUE KEY `uq_folha_estagio_comp` (`contrato_estagio_id`, `competencia`),
+  CONSTRAINT `fk_folha_aprendiz` FOREIGN KEY (`contrato_aprendiz_id`) REFERENCES `contrato_aprendiz` (`id_contrato`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_folha_estagio` FOREIGN KEY (`contrato_estagio_id`) REFERENCES `contrato_estagio` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `fatura_empresa` (
