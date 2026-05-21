@@ -21,7 +21,30 @@ function approvalBadge(s: string) {
   return <span className={`badge ${map[s] || 'badge-grey'}`}>{s || 'Em Análise'}</span>;
 }
 
-const defaultForm = {
+interface Jovem {
+  id_jovem?: number;
+  matricula?: string;
+  nome_completo: string;
+  cpf: string;
+  rg: string;
+  genero: string;
+  nascimento: string;
+  email: string;
+  telefone: string;
+  celular: string;
+  municipio: string;
+  bairro: string;
+  endereco: string;
+  cep: string;
+  escolaridade: string;
+  escola: string;
+  serie: string;
+  aprovacao_status: string;
+  inativo: string;
+  observacoes_sociais: string;
+}
+
+const defaultForm: Partial<Jovem> = {
   nome_completo: '', cpf: '', rg: '', genero: '', nascimento: '',
   email: '', telefone: '', celular: '', municipio: '', bairro: '',
   endereco: '', cep: '', escolaridade: '', escola: '', serie: '',
@@ -30,7 +53,7 @@ const defaultForm = {
 
 export default function JovensPage() {
   return (
-    <CrudPage
+    <CrudPage<Jovem>
       title="Jovens"
       endpoint="/jovens"
       idKey="id_jovem"

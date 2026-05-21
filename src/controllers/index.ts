@@ -162,16 +162,7 @@ async function syncJovemAprovado(id: number) {
     );
     console.log('Inserted new cadastro_jovem record.');
 
-    // If a turma is associated, link it in matricula_turma
-    if (insc.id_turma) {
-      const [[jovemInsertResult]]: any = await pool.query(`SELECT LAST_INSERT_ID() as id_jovem`);
-      const newJovemId = jovemInsertResult.id_jovem;
-      await pool.query(
-        `INSERT INTO matricula_turma (id_jovem, id_turma, data_matricula, status_matricula) VALUES (?, ?, CURDATE(), 'Cursando')`,
-        [newJovemId, insc.id_turma]
-      );
-      console.log(`Linked jovem ${newJovemId} to turma ${insc.id_turma} in matricula_turma.`);
-    }
+
   } catch (err) {
     console.error('Error in syncJovemAprovado:', err);
     throw err; // will be caught by outer handler
@@ -551,7 +542,37 @@ export const FrequenciaController: Record<string, RequestHandler> = {
     } catch (e: any) { handleSqlError(e, res); }
   }
 };
-export const OcorrenciaController = crudController('ocorrencia', 'id');
+export const OcorrenciaController: Record<string, RequestHandler> = {
+  ...crudController('ocorrencia', 'id'),
+  getAll: async (_req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT o.*, 
+                j.nome_completo AS nome_jovem, 
+                j.matricula AS matricula_jovem, 
+                e.nome AS nome_educador
+         FROM ocorrencia o
+         JOIN cadastro_jovem j ON o.jovem_id = j.id_jovem
+         LEFT JOIN educador e ON o.educador_id = e.id_educador
+         ORDER BY o.criado_em DESC`
+      );
+      res.json(rows);
+    } catch (e: any) { handleSqlError(e, res); }
+  },
+  create: async (req: any, res: any) => {
+    try {
+      const username = req.user?.username || req.user?.email || 'sistema';
+      const body = {
+        ...req.body,
+        criado_por: username
+      };
+      const result: any = await BaseModel.insert('ocorrencia', body);
+      res.status(201).json({ id: result.insertId, ...body });
+    } catch (e: any) {
+      handleSqlError(e, res);
+    }
+  }
+};
 export const FeriadoController = crudController('feriado', 'id');
 export const FeriasJovemController = crudController('ferias_jovem', 'id');
 

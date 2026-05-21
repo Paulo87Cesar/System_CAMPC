@@ -1,4 +1,4 @@
-import pool from './src/config/database.js';
+import pool from './src/config/database';
 
 async function checkDb() {
   try {
@@ -42,6 +42,20 @@ async function checkDb() {
         ADD CONSTRAINT \`fk_freq_aula\` FOREIGN KEY (\`id_aula\`) REFERENCES \`aula\` (\`id_aula\`) ON DELETE CASCADE ON UPDATE CASCADE;
       `);
       console.log('Coluna id_aula adicionada com sucesso.');
+    }
+
+    // Verificar colunas de ocorrencia
+    const [ocorrCols] = await pool.query("SHOW COLUMNS FROM ocorrencia") as any[];
+    const hasCriadoPor = ocorrCols.some((c: any) => c.Field === 'criado_por');
+    console.log('ocorrencia.criado_por:', hasCriadoPor ? 'Existe' : 'Nao existe');
+
+    if (!hasCriadoPor) {
+      console.log('Adicionando coluna criado_por na tabela ocorrencia...');
+      await pool.query(`
+        ALTER TABLE \`ocorrencia\`
+        ADD COLUMN \`criado_por\` VARCHAR(150) DEFAULT NULL AFTER \`descricao\`;
+      `);
+      console.log('Coluna criado_por adicionada com sucesso.');
     }
     
     console.log('Verificação e correção do banco finalizada.');

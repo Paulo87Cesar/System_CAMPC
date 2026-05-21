@@ -85,9 +85,9 @@ export default function InscricoesPage() {
         { label: 'Status', key: 'status_processo', render: r => statusBadge(r.status_processo) },
       ]}
       defaultForm={defaultForm}
-      extraActions={row => row.status_processo !== 'Aprovado' ? (
+      extraActions={(row, reload) => row.status_processo !== 'Aprovado' ? (
         <button className="btn btn-ghost btn-sm" title="Aprovar" style={{ color: 'var(--green)' }}
-          onClick={() => row.id && aprovar(row.id)}>
+          onClick={async () => { if (row.id) { await aprovar(row.id); reload(); } }}>
           <CheckCircle size={13} />
         </button>
       ) : null}

@@ -20,7 +20,7 @@ interface CrudPageProps<T extends Record<string, any>> {
   defaultForm: Partial<T>;
   renderForm: (data: Partial<T>, onChange: (field: string, val: any) => void) => React.ReactNode;
   searchKeys?: (keyof T)[];
-  extraActions?: (row: T) => React.ReactNode;
+  extraActions?: (row: T, reload: () => void) => React.ReactNode;
   validationSchema?: z.ZodSchema<any>;
 }
 
@@ -147,7 +147,7 @@ const handleSave = async () => {
                     ))}
                     <td>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        {extraActions?.(row)}
+                        {extraActions?.(row, load)}
                         <button className="btn btn-ghost btn-sm" title="Editar" onClick={() => openEdit(row)}>
                           <Pencil size={13} />
                         </button>

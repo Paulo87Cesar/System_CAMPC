@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Search, Users, ClipboardCheck, BarChart3, Printer, Save, ChevronRight, Calendar, BookOpen } from 'lucide-react';
+import { Search, Users, ClipboardCheck, BarChart3, Printer, Save, ChevronRight, Calendar, BookOpen, Maximize2, Minimize2, X } from 'lucide-react';
 import api from '../api';
 import { useToast } from '../context/ToastContext';
 
@@ -58,6 +58,7 @@ export default function FrequenciasPage() {
   const [resumo, setResumo] = useState<ResumoAluno[]>([]);
   const [loadingResumo, setLoadingResumo] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Load turmas & educadores
   useEffect(() => {
@@ -302,7 +303,7 @@ export default function FrequenciasPage() {
 
       {/* Tab bar */}
       {selectedTurma && alunos.length > 0 && (
-        <>
+        <div className={`freq-workspace ${isFullscreen ? 'freq-fullscreen' : ''}`}>
           <div className="freq-tabs">
             {tabs.map((tab, i) => (
               <button
@@ -385,6 +386,13 @@ export default function FrequenciasPage() {
                   </button>
                   <button className="btn btn-sm btn-danger" onClick={() => toggleAll(false)} title="Marcar todos como ausentes">
                     ✗ Todos Ausentes
+                  </button>
+                  <div style={{ width: 1, height: 20, background: 'var(--neutral-3)', margin: '0 8px' }} />
+                  <button className="btn btn-ghost btn-sm" onClick={() => setIsFullscreen(!isFullscreen)} title={isFullscreen ? "Minimizar" : "Expandir para tela cheia"}>
+                    {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                  </button>
+                  <button className="btn btn-ghost btn-sm" style={{ color: 'var(--red)' }} onClick={() => { setIsFullscreen(false); setActiveTab(0); }} title="Fechar lista e voltar">
+                    <X size={16} />
                   </button>
                 </div>
               </div>
@@ -558,7 +566,7 @@ export default function FrequenciasPage() {
               )}
             </div>
           )}
-        </>
+        </div>
       )}
 
       {/* Empty state when no turma or no search yet */}

@@ -22,7 +22,7 @@ export default function ProjetosPage() {
         { 
           label: 'Ações', 
           key: 'acoes', 
-          render: r => (
+          render: (r: any) => (
             <button 
               className="btn-secondary" 
               style={{ padding: '4px 8px', fontSize: '12px' }} 

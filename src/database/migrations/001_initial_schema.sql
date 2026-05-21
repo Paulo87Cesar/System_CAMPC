@@ -330,6 +330,7 @@ CREATE TABLE IF NOT EXISTS `ocorrencia` (
   `tipo` ENUM('comportamental','atraso','falta','merito') NOT NULL DEFAULT 'comportamental',
   `gravidade` ENUM('leve','media','grave') NOT NULL DEFAULT 'leve',
   `descricao` TEXT NOT NULL,
+  `criado_por` VARCHAR(150) DEFAULT NULL,
   `criado_em` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_ocorr_jovem` FOREIGN KEY (`jovem_id`) REFERENCES `cadastro_jovem` (`id_jovem`) ON DELETE CASCADE ON UPDATE CASCADE,

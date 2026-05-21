@@ -220,12 +220,13 @@ a { text-decoration: none; color: inherit; }
 .stat-card.yellow .stat-value { color: var(--yellow); }
 .stat-card.purple .stat-value { color: var(--purple); }
 
-/* ─── CARD ─────────────────────────────────────── */
+/* �── CARD ─────────────────────────────────────── */
 .card {
   background: var(--neutral-0);
   border-radius: var(--radius);
   border: 1px solid var(--neutral-2);
   box-shadow: var(--shadow-sm);
+  z-index: 1;
 }
 
 .card-header {
@@ -717,6 +718,18 @@ textarea { resize: vertical; min-height: 80px; }
   border-radius: var(--radius);
   border: 1px solid var(--neutral-2);
   overflow: hidden;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.freq-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+  z-index: 1;
 }
 
 .freq-tab {
@@ -746,6 +759,7 @@ textarea { resize: vertical; min-height: 80px; }
 /* Grid / Table */
 .freq-grid-wrap {
   overflow-x: auto;
+  z-index: 1;
 }
 
 .freq-table {
@@ -846,6 +860,7 @@ textarea { resize: vertical; min-height: 80px; }
   background: var(--neutral-1);
   border-radius: 0 0 var(--radius) var(--radius);
   flex-wrap: wrap;
+  z-index: 1;
 }
 
 .freq-qs-item {
@@ -917,4 +932,71 @@ textarea { resize: vertical; min-height: 80px; }
   .sidebar, .topbar, .freq-header, .freq-selector-bar, .freq-tabs, .freq-quick-stats, .btn { display: none !important; }
   .page-content { padding: 0 !important; }
   .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+}
+
+/* Fullscreen Mode for Frequencias */
+.freq-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Limit card height in normal (minimizado) mode and set flex column */
+.freq-workspace:not(.freq-fullscreen) > .card {
+  max-height: calc(100vh - 380px);
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Allow components to fill remaining height of card and scroll internally */
+.freq-workspace .card-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.freq-workspace .freq-grid-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--neutral-2);
+}
+
+.freq-workspace .table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.freq-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  border-radius: 0 !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  background: var(--neutral-1);
+  padding: 24px;
+}
+
+.freq-fullscreen > .card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0 !important;
+  min-height: 0;
+  max-height: none !important;
+}
+
+.freq-fullscreen .freq-grid-wrap {
+  flex: 1;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--neutral-2);
+}
+
+.freq-fullscreen .freq-quick-stats {
+  padding: 16px 24px;
 }
