@@ -429,7 +429,128 @@ export const DashboardController: Record<string, RequestHandler> = {
 };
 
 // --- Phase 1: Frequência e Ocorrências ---
-export const FrequenciaController = crudController('frequencia', 'id');
+export const FrequenciaController: Record<string, RequestHandler> = {
+  ...crudController('frequencia', 'id'),
+
+  // GET /frequencias/turma/:turmaId/alunos  — lista alunos matriculados numa turma
+  getAlunosByTurma: async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT mt.id_matricula, j.nome_completo, j.matricula AS matricula_aluno, mt.status_matricula
+         FROM matricula_turma mt
+         JOIN cadastro_jovem j ON j.id_jovem = mt.id_jovem
+         WHERE mt.id_turma = ? AND mt.status_matricula = 'Cursando'
+         ORDER BY j.nome_completo ASC`,
+        [req.params.turmaId]
+      );
+      res.json(rows);
+    } catch (e: any) { handleSqlError(e, res); }
+  },
+
+  // GET /frequencias/turma/:turmaId/data/:data — busca frequência lançada para uma turma+data
+  getFrequenciaByTurmaData: async (req, res) => {
+    try {
+      const { turmaId, data } = req.params;
+      // Busca aula
+      const [aulaRows] = await pool.query(
+        `SELECT * FROM aula WHERE id_turma = ? AND data_aula = ?`,
+        [turmaId, data]
+      ) as any[];
+      const aula = (aulaRows as any[])[0] || null;
+
+      // Busca frequencias para os alunos dessa turma nessa data
+      const [freqRows] = await pool.query(
+        `SELECT f.*, mt.id_matricula, j.nome_completo, j.matricula AS matricula_aluno
+         FROM matricula_turma mt
+         JOIN cadastro_jovem j ON j.id_jovem = mt.id_jovem
+         LEFT JOIN frequencia f ON f.matricula_id = mt.id_matricula AND f.data_aula = ?
+         WHERE mt.id_turma = ? AND mt.status_matricula = 'Cursando'
+         ORDER BY j.nome_completo ASC`,
+        [data, turmaId]
+      );
+      res.json({ aula, frequencias: freqRows });
+    } catch (e: any) { handleSqlError(e, res); }
+  },
+
+  // POST /frequencias/lancar — salvar lançamento em lote
+  lancar: async (req, res) => {
+    try {
+      const { id_turma, data_aula, periodo, id_educador, conteudo_ministrado, observacoes_gerais, frequencias } = req.body;
+
+      // 1. Upsert na tabela aula
+      const [existingAula] = await pool.query(
+        `SELECT id_aula FROM aula WHERE id_turma = ? AND data_aula = ?`,
+        [id_turma, data_aula]
+      ) as any[];
+      
+      let id_aula: number;
+      if ((existingAula as any[]).length > 0) {
+        id_aula = (existingAula as any[])[0].id_aula;
+        await pool.query(
+          `UPDATE aula SET periodo = ?, id_educador = ?, conteudo_ministrado = ?, observacoes_gerais = ? WHERE id_aula = ?`,
+          [periodo || null, id_educador || null, conteudo_ministrado || null, observacoes_gerais || null, id_aula]
+        );
+      } else {
+        const [insertResult]: any = await pool.query(
+          `INSERT INTO aula (id_turma, data_aula, periodo, id_educador, conteudo_ministrado, observacoes_gerais) VALUES (?, ?, ?, ?, ?, ?)`,
+          [id_turma, data_aula, periodo || null, id_educador || null, conteudo_ministrado || null, observacoes_gerais || null]
+        );
+        id_aula = insertResult.insertId;
+      }
+
+      // 2. Upsert frequências (um por aluno)
+      for (const f of frequencias) {
+        await pool.query(
+          `INSERT INTO frequencia (id_aula, matricula_id, data_aula, presente, justificativa, observacao_individual)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE presente = VALUES(presente), justificativa = VALUES(justificativa), observacao_individual = VALUES(observacao_individual), id_aula = VALUES(id_aula)`,
+          [id_aula, f.matricula_id, data_aula, f.presente ? 1 : 0, f.justificativa || null, f.observacao_individual || null]
+        );
+      }
+
+      res.json({ message: 'Frequência lançada com sucesso!', id_aula });
+    } catch (e: any) { handleSqlError(e, res); }
+  },
+
+  // GET /frequencias/turma/:turmaId/resumo — resumo de frequências da turma
+  getResumoTurma: async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT 
+            j.nome_completo,
+            j.matricula AS matricula_aluno,
+            COUNT(f.id) AS total_aulas_lancadas,
+            SUM(CASE WHEN f.presente = 1 THEN 1 ELSE 0 END) AS total_presencas,
+            SUM(CASE WHEN f.presente = 0 THEN 1 ELSE 0 END) AS total_faltas
+         FROM matricula_turma mt
+         JOIN cadastro_jovem j ON j.id_jovem = mt.id_jovem
+         LEFT JOIN frequencia f ON f.matricula_id = mt.id_matricula
+         WHERE mt.id_turma = ? AND mt.status_matricula = 'Cursando'
+         GROUP BY mt.id_matricula, j.nome_completo, j.matricula
+         ORDER BY j.nome_completo ASC`,
+        [req.params.turmaId]
+      );
+      res.json(rows);
+    } catch (e: any) { handleSqlError(e, res); }
+  },
+
+  // GET /frequencias/turma/:turmaId/aulas — lista de aulas lançadas para a turma
+  getAulasByTurma: async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT a.*, e.nome AS nome_educador,
+                (SELECT COUNT(*) FROM frequencia f WHERE f.id_aula = a.id_aula AND f.presente = 1) AS total_presentes,
+                (SELECT COUNT(*) FROM frequencia f WHERE f.id_aula = a.id_aula AND f.presente = 0) AS total_ausentes
+         FROM aula a
+         LEFT JOIN educador e ON e.id_educador = a.id_educador
+         WHERE a.id_turma = ?
+         ORDER BY a.data_aula DESC`,
+        [req.params.turmaId]
+      );
+      res.json(rows);
+    } catch (e: any) { handleSqlError(e, res); }
+  }
+};
 export const OcorrenciaController = crudController('ocorrencia', 'id');
 export const FeriadoController = crudController('feriado', 'id');
 export const FeriasJovemController = crudController('ferias_jovem', 'id');

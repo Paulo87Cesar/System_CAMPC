@@ -83,6 +83,11 @@ crudRoutes(router, '/contratos', ContratoController);
 
 // --- Phase 1 ---
 crudRoutes(router, '/frequencias', FrequenciaController);
+router.get('/frequencias/turma/:turmaId/alunos', FrequenciaController.getAlunosByTurma);
+router.get('/frequencias/turma/:turmaId/data/:data', FrequenciaController.getFrequenciaByTurmaData);
+router.post('/frequencias/lancar', FrequenciaController.lancar);
+router.get('/frequencias/turma/:turmaId/resumo', FrequenciaController.getResumoTurma);
+router.get('/frequencias/turma/:turmaId/aulas', FrequenciaController.getAulasByTurma);
 crudRoutes(router, '/ocorrencias', OcorrenciaController);
 crudRoutes(router, '/feriados', FeriadoController);
 crudRoutes(router, '/ferias_jovem', FeriasJovemController);
