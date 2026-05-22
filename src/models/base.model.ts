@@ -16,12 +16,14 @@ export class BaseModel {
     private static VIRTUAL_FIELDS = [
       'nome_curso', 'nome_educador', 'nome_jovem', 'nome_empresa', 
       'nome_projeto', 'nome_programa', 'matricula_jovem', 'matricula_aluno',
-      'codigo_turma', 'matricula_busca'
+      'codigo_turma', 'matricula_busca', 'periodo_turma', 'status_turma',
+      'data_inicio_turma', 'data_fim_turma', 'modalidade_turma'
     ];
 
   private static cleanData(table: string, data: Record<string, any>) {
     const cleaned: Record<string, any> = {};
     for (const key in data) {
+      if (table === 'matricula_turma' && key === 'matricula') { continue; }
       if (table === 'curso' && key === 'nome_curso') { cleaned[key] = data[key]; continue; }
       if (table === 'projeto' && key === 'nome_projeto') { cleaned[key] = data[key]; continue; }
       if (table === 'programa' && key === 'nome_programa') { cleaned[key] = data[key]; continue; }

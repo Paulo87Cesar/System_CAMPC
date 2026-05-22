@@ -114,5 +114,6 @@ crudRoutes(router, '/seguro_jovem', SeguroJovemController);
 
 // Custom PDF Route
 router.get('/pdf/recibo_pagamento/:id', PdfController.gerarReciboPagamento);
+router.get('/pdf/projetos/:id/indicadores', PdfController.gerarRelatorioProjeto);
 
 export default router;

@@ -3,7 +3,14 @@ import CrudPage from '../components/CrudPage';
 import api from '../api';
 
 interface Jovem { id_jovem: number; nome_completo: string; }
-interface Turma { id_turma: number; codigo_turma: string; }
+interface Turma {
+  id_turma: number;
+  codigo_turma: string;
+  nome_curso?: string;
+  nome_programa?: string;
+  nome_projeto?: string;
+  periodo?: string;
+}
 
 interface Matricula {
   id_matricula?: number;
@@ -15,6 +22,13 @@ interface Matricula {
   observacoes?: string;
   nome_jovem?: string;
   codigo_turma?: string;
+  nome_curso?: string;
+  nome_programa?: string;
+  nome_projeto?: string;
+  periodo_turma?: string;
+  status_turma?: string;
+  data_inicio_turma?: string;
+  modalidade_turma?: string;
 }
 
 export default function MatriculasPage() {
@@ -45,11 +59,16 @@ export default function MatriculasPage() {
       title="Matrículas"
       endpoint="/matriculas"
       idKey="id_matricula"
-      searchKeys={['nome_jovem', 'codigo_turma', 'matricula']}
+      searchKeys={['nome_jovem', 'codigo_turma', 'matricula', 'nome_curso', 'nome_programa', 'nome_projeto']}
       columns={[
         { label: 'Matrícula', key: 'matricula' },
         { label: 'Jovem', key: 'nome_jovem', render: r => <button className="link-btn">{r.nome_jovem}</button> },
+        { label: 'Projeto', key: 'nome_projeto' },
+        { label: 'Programa', key: 'nome_programa' },
+        { label: 'Curso', key: 'nome_curso' },
         { label: 'Turma', key: 'codigo_turma' },
+        { label: 'Período', key: 'periodo_turma', render: r => r.periodo_turma || '-' },
+        { label: 'Início Turma', key: 'data_inicio_turma', render: r => r.data_inicio_turma ? new Date(r.data_inicio_turma).toLocaleDateString('pt-BR') : '-' },
         { label: 'Data Matrícula', key: 'data_matricula', render: r => r.data_matricula ? new Date(r.data_matricula).toLocaleDateString('pt-BR') : '-' },
         { label: 'Status', key: 'status_matricula', render: r => statusBadge(r.status_matricula) },
       ]}
@@ -67,7 +86,11 @@ export default function MatriculasPage() {
             <label>Turma *</label>
             <select value={data.id_turma || ''} onChange={e => onChange('id_turma', e.target.value)}>
               <option value="">Selecione a Turma</option>
-              {turmas.map(t => <option key={t.id_turma} value={t.id_turma}>{t.codigo_turma}</option>)}
+              {turmas.map(t => (
+                <option key={t.id_turma} value={t.id_turma}>
+                  {t.nome_projeto ? `${t.nome_projeto} > ` : ''}{t.nome_programa ? `${t.nome_programa} > ` : ''}{t.nome_curso ? `${t.nome_curso} > ` : ''}{t.codigo_turma}
+                </option>
+              ))}
             </select>
           </div>
           <div className="form-grid">

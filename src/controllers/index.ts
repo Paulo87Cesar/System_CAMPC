@@ -230,7 +230,8 @@ export const ProjetoController: Record<string, RequestHandler> = {
             COUNT(DISTINCT pr.id_programa) AS total_programas_vinculados,
             COUNT(DISTINCT c.id_curso) AS total_cursos_ofertados,
             COUNT(DISTINCT t.id_turma) AS total_turmas_abertas,
-            COUNT(DISTINCT mt.id_jovem) AS total_jovens_atendidos
+            COUNT(DISTINCT mt.id_jovem) AS total_jovens_atendidos,
+            COALESCE((SELECT SUM(meta_jovens) FROM programa WHERE id_projeto = p.id_projeto), 0) AS meta_jovens_programas
         FROM projeto p
         LEFT JOIN programa pr ON p.id_projeto = pr.id_projeto
         LEFT JOIN curso c ON pr.id_programa = c.id_programa
@@ -244,7 +245,72 @@ export const ProjetoController: Record<string, RequestHandler> = {
         res.status(404).json({ message: 'Projeto não encontrado' });
         return;
       }
-      res.json((rows as any[])[0]);
+      const projeto = (rows as any[])[0];
+
+      const [programas]: any = await pool.query(
+        `SELECT pr.id_programa, pr.nome_programa, pr.ano, pr.status, pr.meta_jovens,
+                COUNT(DISTINCT c.id_curso) AS total_cursos,
+                COUNT(DISTINCT t.id_turma) AS total_turmas,
+                COUNT(DISTINCT mt.id_jovem) AS total_jovens
+         FROM programa pr
+         LEFT JOIN curso c ON c.id_programa = pr.id_programa
+         LEFT JOIN turma t ON t.id_curso = c.id_curso
+         LEFT JOIN matricula_turma mt ON mt.id_turma = t.id_turma
+         WHERE pr.id_projeto = ?
+         GROUP BY pr.id_programa, pr.nome_programa, pr.ano, pr.status, pr.meta_jovens
+         ORDER BY pr.ano DESC, pr.nome_programa`,
+        [req.params.id]
+      );
+
+      const [cursos]: any = await pool.query(
+        `SELECT c.id_curso, c.nome_curso, c.tipo_curso, c.modalidade, c.meta_turmas, c.meta_jovens,
+                pr.nome_programa,
+                COUNT(DISTINCT d.id_disciplina) AS total_disciplinas,
+                COUNT(DISTINCT t.id_turma) AS total_turmas,
+                COUNT(DISTINCT mt.id_jovem) AS total_jovens
+         FROM curso c
+         JOIN programa pr ON pr.id_programa = c.id_programa
+         LEFT JOIN disciplina d ON d.id_curso = c.id_curso
+         LEFT JOIN turma t ON t.id_curso = c.id_curso
+         LEFT JOIN matricula_turma mt ON mt.id_turma = t.id_turma
+         WHERE pr.id_projeto = ?
+         GROUP BY c.id_curso, c.nome_curso, c.tipo_curso, c.modalidade, c.meta_turmas, c.meta_jovens, pr.nome_programa
+         ORDER BY pr.nome_programa, c.nome_curso`,
+        [req.params.id]
+      );
+
+      const [turmas]: any = await pool.query(
+        `SELECT t.id_turma, t.codigo_turma, t.periodo, t.modalidade, t.vagas_total, t.local, t.sala,
+                DATE_FORMAT(t.data_inicio, '%Y-%m-%d') AS data_inicio,
+                DATE_FORMAT(t.data_fim, '%Y-%m-%d') AS data_fim,
+                t.ativo, c.nome_curso, pr.nome_programa, e.nome AS nome_educador,
+                COUNT(DISTINCT mt.id_jovem) AS total_jovens
+         FROM turma t
+         JOIN curso c ON c.id_curso = t.id_curso
+         JOIN programa pr ON pr.id_programa = c.id_programa
+         LEFT JOIN educador e ON e.id_educador = t.id_educador
+         LEFT JOIN matricula_turma mt ON mt.id_turma = t.id_turma
+         WHERE pr.id_projeto = ?
+         GROUP BY t.id_turma, t.codigo_turma, t.periodo, t.modalidade, t.vagas_total, t.local, t.sala,
+                  t.data_inicio, t.data_fim, t.ativo, c.nome_curso, pr.nome_programa, e.nome
+         ORDER BY t.data_inicio DESC, t.codigo_turma`,
+        [req.params.id]
+      );
+
+      const [jovens]: any = await pool.query(
+        `SELECT DISTINCT j.id_jovem, j.matricula, j.nome_completo, mt.status_matricula,
+                t.codigo_turma, c.nome_curso, pr.nome_programa
+         FROM matricula_turma mt
+         JOIN cadastro_jovem j ON j.id_jovem = mt.id_jovem
+         JOIN turma t ON t.id_turma = mt.id_turma
+         JOIN curso c ON c.id_curso = t.id_curso
+         JOIN programa pr ON pr.id_programa = c.id_programa
+         WHERE pr.id_projeto = ?
+         ORDER BY j.nome_completo`,
+        [req.params.id]
+      );
+
+      res.json({ ...projeto, programas, cursos, turmas, jovens });
     } catch (e: any) { handleSqlError(e, res); }
   }
 };
@@ -255,8 +321,13 @@ export const ProgramaController: Record<string, RequestHandler> = {
   getAll: async (_req, res) => {
     try {
       const [rows] = await pool.query(
-        `SELECT pg.*, p.nome_projeto FROM programa pg
-         JOIN projeto p ON p.id_projeto = pg.id_projeto ORDER BY pg.ano DESC`
+        `SELECT pg.*,
+                DATE_FORMAT(pg.data_inicio, '%Y-%m-%d') AS data_inicio,
+                DATE_FORMAT(pg.data_fim, '%Y-%m-%d') AS data_fim,
+                p.nome_projeto
+         FROM programa pg
+         JOIN projeto p ON p.id_projeto = pg.id_projeto
+         ORDER BY pg.ano DESC, pg.nome_programa`
       );
       res.json(rows);
     } catch (e: any) { handleSqlError(e, res); }
@@ -269,8 +340,11 @@ export const CursoController: Record<string, RequestHandler> = {
   getAll: async (_req, res) => {
     try {
       const [rows] = await pool.query(
-        `SELECT c.*, pg.nome_programa FROM curso c
-         LEFT JOIN programa pg ON pg.id_programa = c.id_programa ORDER BY c.nome_curso`
+        `SELECT c.*, pg.nome_programa, p.nome_projeto
+         FROM curso c
+         LEFT JOIN programa pg ON pg.id_programa = c.id_programa
+         LEFT JOIN projeto p ON p.id_projeto = pg.id_projeto
+         ORDER BY c.nome_curso`
       );
       res.json(rows);
     } catch (e: any) { handleSqlError(e, res); }
@@ -283,8 +357,13 @@ export const DisciplinaController: Record<string, RequestHandler> = {
   getAll: async (_req, res) => {
     try {
       const [rows] = await pool.query(
-        `SELECT d.*, c.nome_curso FROM disciplina d
-         JOIN curso c ON c.id_curso = d.id_curso ORDER BY d.id_curso, d.ordem`
+        `SELECT d.*, c.nome_curso, pg.nome_programa, p.nome_projeto, e.nome AS nome_educador
+         FROM disciplina d
+         JOIN curso c ON c.id_curso = d.id_curso
+         LEFT JOIN programa pg ON pg.id_programa = c.id_programa
+         LEFT JOIN projeto p ON p.id_projeto = pg.id_projeto
+         LEFT JOIN educador e ON e.id_educador = d.educador_preferencial
+         ORDER BY d.id_curso, d.ordem`
       );
       res.json(rows);
     } catch (e: any) { handleSqlError(e, res); }
@@ -297,9 +376,17 @@ export const TurmaController: Record<string, RequestHandler> = {
   getAll: async (_req, res) => {
     try {
       const [rows] = await pool.query(
-        `SELECT t.*, c.nome_curso, e.nome AS nome_educador
+        `SELECT t.*,
+                DATE_FORMAT(t.data_inicio, '%Y-%m-%d') AS data_inicio,
+                DATE_FORMAT(t.data_fim, '%Y-%m-%d') AS data_fim,
+                TIME_FORMAT(t.horario_inicio, '%H:%i') AS horario_inicio,
+                TIME_FORMAT(t.horario_fim, '%H:%i') AS horario_fim,
+                COALESCE(t.vagas_total, t.vagas) AS vagas_total,
+                c.nome_curso, pg.nome_programa, p.nome_projeto, e.nome AS nome_educador
          FROM turma t
          JOIN curso c ON c.id_curso = t.id_curso
+         LEFT JOIN programa pg ON pg.id_programa = c.id_programa
+         LEFT JOIN projeto p ON p.id_projeto = pg.id_projeto
          LEFT JOIN educador e ON e.id_educador = t.id_educador
          ORDER BY t.data_inicio DESC`
       );
@@ -341,10 +428,20 @@ export const MatriculaController: Record<string, RequestHandler> = {
   getAll: async (_req, res) => {
     try {
       const [rows] = await pool.query(
-        `SELECT mt.*, j.nome_completo AS nome_jovem, j.matricula AS matricula, t.codigo_turma
+        `SELECT mt.*,
+                DATE_FORMAT(mt.data_matricula, '%Y-%m-%d') AS data_matricula,
+                j.nome_completo AS nome_jovem, j.matricula AS matricula,
+                t.codigo_turma, t.periodo AS periodo_turma, t.ativo AS status_turma,
+                DATE_FORMAT(t.data_inicio, '%Y-%m-%d') AS data_inicio_turma,
+                DATE_FORMAT(t.data_fim, '%Y-%m-%d') AS data_fim_turma,
+                t.modalidade AS modalidade_turma,
+                c.nome_curso, pg.nome_programa, p.nome_projeto
          FROM matricula_turma mt
          JOIN cadastro_jovem j ON j.id_jovem = mt.id_jovem
          JOIN turma t ON t.id_turma = mt.id_turma
+         JOIN curso c ON c.id_curso = t.id_curso
+         JOIN programa pg ON pg.id_programa = c.id_programa
+         LEFT JOIN projeto p ON p.id_projeto = pg.id_projeto
          ORDER BY mt.data_matricula DESC`
       );
       res.json(rows);

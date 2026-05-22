@@ -14,6 +14,8 @@ import InscricoesPage from './pages/Inscricoes';
 import EducadoresPage from './pages/Educadores';
 import ProjetosPage from './pages/Projetos';
 import ProjetoIndicadores from './pages/ProjetoIndicadores';
+import ProjetoRelatorio from './pages/ProjetoRelatorio';
+import ProjetoRelatorioFullscreen from './pages/ProjetoRelatorioFullscreen';
 import ProgramasPage from './pages/Programas';
 import CursosPage from './pages/Cursos';
 import DisciplinasPage from './pages/Disciplinas';
@@ -59,6 +61,8 @@ function AppRoutes() {
                 <Route path="/educadores" element={<EducadoresPage />} />
                 <Route path="/projetos" element={<ProjetosPage />} />
                 <Route path="/projetos/:id/indicadores" element={<ProjetoIndicadores />} />
+                <Route path="/projetos/:id/relatorio" element={<ProjetoRelatorio />} />
+                <Route path="/projetos/:id/relatorio-tela-cheia" element={<ProjetoRelatorioFullscreen />} />
                 <Route path="/programas" element={<ProgramasPage />} />
                 <Route path="/cursos" element={<CursosPage />} />
                 <Route path="/disciplinas" element={<DisciplinasPage />} />

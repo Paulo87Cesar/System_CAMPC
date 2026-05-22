@@ -1,5 +1,6 @@
 import React from 'react';
 import CrudPage from '../components/CrudPage';
+import { downloadPDF } from '../api';
 
 function statusBadge(s: string) {
   if (s === 'pago') return <span className="badge badge-green">Pago</span>;
@@ -13,7 +14,9 @@ const defaultForm = {
 export default function FolhaPagamentoPage() {
   
   const handleDownloadPDF = (id: number) => {
-    window.open(`http://localhost:3000/api/pdf/recibo_pagamento/${id}`, '_blank');
+    const pdfUrl = `${import.meta.env.VITE_API_URL || '/api'}/pdf/recibo_pagamento/${id}`;
+    const filename = `recibo_pagamento_${id}.pdf`;
+    downloadPDF(pdfUrl, filename);
   };
 
   return (
